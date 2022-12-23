@@ -61,7 +61,8 @@ def save_json(idx, games):
                 info = get_info(appid)[str(appid)]['data']
                 
                 os.makedirs(json_path, exist_ok = True)
-                json.dump(info, open(f'{json_path}/{appid}.json', 'w'), indent = 4)
+                f = open(f'{json_path}/{appid}.json', 'w', encoding='utf-8')
+                json.dump(info, f, ensure_ascii=False,indent = 4)
             
             except Exception as e:
                 print(f'[Error. 001] json file can\'t save : [{appid}] {e}\n')
@@ -71,7 +72,7 @@ def save_json(idx, games):
         
         except Exception as e:
             print(f'[Error. 002] api data receieve failed : [{appid}] {e}\n')
-        time.sleep(5)
+        time.sleep(7)
         
     print(f'[Done] process : {idx} done.\n')
 
