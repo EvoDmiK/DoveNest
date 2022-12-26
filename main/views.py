@@ -3,4 +3,4 @@ from datetime import datetime
 # Create your views here.s
 
 def index(request):
-    return render(request, 'index.html', context = {})
+    return render(request, 'home.html', context = {})

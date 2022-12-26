@@ -1,0 +1,51 @@
+{% load static %}
+<html lang="ko">
+    <body>
+        {% include 'head.html' %}
+        
+         <!-- ***** Header Area Start ***** -->
+        <header class="header-area header-sticky">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <nav class="main-nav">
+                        <!-- 라이트 / 다크모드 설정 토글 -->
+                        <div>
+                            <input type="checkbox" id="theme_toggle">
+                            <label for="theme_toggle" class="toggle_switch">
+                                <span class="toggle__handler"></span>
+                            </label>
+                        </div>
+                            <!-- ***** Search End ***** -->
+                            <div class="search-input">
+                            <form id="search" action="#">
+                                <input type="text" placeholder="Type Something" id='searchText' name="searchKeyword" onkeypress="handle" />
+                                <i class="fa fa-search"></i>
+                            </form>
+                            </div>
+                            <!-- ***** Search End ***** -->
+                            <!-- ***** Menu Start ***** -->
+                            <ul class="nav">
+                                <li><a href="#" class="active">Home</a></li>
+                                <li><a href="#">Browse</a></li>
+                                <li><a href="#">Details</a></li>
+                                <li><a href="#">Streams</a></li>
+                                <li><a class="profile" href="#">Profile <img src={% static "assets/images/default.png" %} alt=""></a></li>
+                            </ul>   
+                            <a class='menu-trigger'>
+                                <span>Menu</span>
+                            </a>
+                            <!-- ***** Menu End ***** -->
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- ***** Header Area End ***** -->
+
+        {% block content %}
+        {% endblock %}
+
+
+  </body>
+</html>

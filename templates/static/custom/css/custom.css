@@ -69,7 +69,7 @@ body { background:var(--bg-color); }
     letter-spacing: .3px;
 }
 
-.header-area .main-nav .nav li a span{
+.header-area .main-nav .nav li .profile{
     display: block;
     font-weight: 400;
     font-size: 14px;
@@ -171,4 +171,6 @@ border-radius: 23px;
     transition:transform .2s ease-in-out,background .3s,border-color .3s
 }
 
-#theme_toggle:checked+.header-area .main-nav .nav li a{ background:var(--background-color) }
+#theme_toggle:checked+.header-area .main-nav .nav li a{ 
+    background:var(--background-color) 
+}
