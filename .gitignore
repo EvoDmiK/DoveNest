@@ -1,8 +1,9 @@
-## 데이터 보호 
+## 데이터 보호
+steam/jsons/**/* 
 **/*.sqlite3
-api/**/*.json
+steam/logs/*
 **/**/*.jpg
-steam/**/*
+
 
 ## 실험 코드 보호
 experiment/
@@ -17,5 +18,6 @@ experiment/
 **/*.txt
 
 ## 그냥 내가 보기 싫어서 없애둔 것들
+**/.ipynb_checkpoints
 **/**/*-checkpoint*
 **/**/*.pyc

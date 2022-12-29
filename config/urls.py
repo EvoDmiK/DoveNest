@@ -1,4 +1,4 @@
-"""config URL Configuration
+'''config URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.0/topics/http/urls/
@@ -12,14 +12,24 @@ Class-based views
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+'''
 from django.urls import path, include, re_path
-from django.views.generic import TemplateView
 from django.contrib import admin
 
 urlpatterns = [
+    ## admin 페이지
     path('admin/', admin.site.urls),
+
+    ## 구현할 페이지들 ''은 메인 페이지
+    path('community/', include('community.urls')),
+    path('gyejeong/', include('accounts.urls')),
+    path('profile/', include('UserProfile.urls')),
+    path('news/', include('news.urls')),
     path('', include('main.urls')),
-    path('exp/', include('experiment.urls')),
-    re_path(r'.well-known/acme-challenge', include('acme_challenge.urls'))
+
+    ## 실험 페이지
+    path('exp/', include('experiment.urls'), name='exp'),
+
+    ## 소셜 로그인 관련 페이지들
+    re_path(r'^accounts/', include('allauth.urls')),
 ]

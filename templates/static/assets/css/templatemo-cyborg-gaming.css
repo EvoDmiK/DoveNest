@@ -9,7 +9,7 @@ Table of contents
 01. font & reset css
 02. reset
 03. global styles
-04. header
+04. header 
 05. banner
 06. features
 07. testimonials
@@ -936,7 +936,7 @@ Footer Style
 --------------------------------------------- 
 */
 
-footer p {
+/* footer p {
   text-align: center;
   padding: 30px 0px;
   color: #fff;
@@ -950,7 +950,7 @@ footer p a {
 
 footer p a:hover {
   color: #ec6090;
-}
+} */
 
 /* 
 ---------------------------------------------
@@ -1062,13 +1062,13 @@ Featured Games Style
   color: #ec6090;
 }
 
-.top-downloaded {
+/* .top-downloaded {
   border-radius: 23px;
   background-color: #1f2122;
   padding: 30px;
   max-height: 567px;
   min-height: 567px;
-}
+} */
 
 .top-downloaded ul li {
   position: relative;
@@ -1144,7 +1144,7 @@ Start Stream Style
 
 .start-stream .item {
   padding: 30px;
-  border: 1px solid #444;
+  border: 1px solid #444;  
   border-radius: 23px;
 }
 
@@ -1517,11 +1517,11 @@ Profile Style
 --------------------------------------------- 
 */
 
-.main-profile {
+/* .main-profile {
   border-radius: 23px;
   padding: 30px;
   background-color: #1f2122;
-}
+} */
 
 .main-profile .main-info span {
   font-size: 14px;
@@ -1580,12 +1580,12 @@ Profile Style
   margin-top: 30px;
 }
 
-.clips .item  {
+/* .clips .item  {
   border-radius: 23px;
   padding: 30px 15px;
   background-color: #27292a;
   margin-bottom: 30px;
-}
+} */
 
 .clips .item .thumb {
   position: relative;

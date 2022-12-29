@@ -8,7 +8,7 @@
     --search-icon-color: #fff;
 
     --font-color: #8a2be2;
-    --content-color: #ab6fe3;
+    --content-color: #783ba3;
 
     --line-color: #fff;
     --profile-circle-color: #8A2BE2;
@@ -81,11 +81,17 @@ body { background:var(--bg-color); }
     border-radius: 23px;
   }
 
+/* 메인 프로필 스타일 */
+.main-profile {
+    border-radius: 23px;
+    padding: 30px;
+    background-color: var(--content-color);
+}
 
 .main-profile ul {
     border-radius: 23px;
     padding: 30px;
-    background-color: var(--content-color);
+    background-color: var(--search-input-color);
 }
 
 .main-profile ul li {
@@ -97,6 +103,14 @@ body { background:var(--bg-color); }
     border-bottom: 1px solid var(--search-icon-color);
 }
 
+/* ====================================================== */
+
+.clips .item  {
+    border-radius: 23px;
+    padding: 30px 15px;
+    background-color: var(--search-input-color);
+    margin-bottom: 30px;
+  }
 
 .header-area .main-nav .nav li .profile{
     display: block;
@@ -149,6 +163,42 @@ border-radius: 23px;
     padding-bottom: 20px;
 }
 
+.featured-games {
+    border-radius: 23px;
+    background-color: var(--content-color);
+    padding: 30px;
+}
+
+.top-downloaded {
+    border-radius: 23px;
+    background-color: #1f2122;
+    padding: 30px;
+    max-height: 567px;
+    min-height: 567px;
+}
+  
+
+/* footer style */
+footer p {
+    text-align: center;
+    padding: 30px 0px;
+    color: var(--circle-color);
+    font-weight: 300;
+  }
+  
+  footer p a {
+    color: var(--circle-color);
+    transition: all .3s;
+  }
+  
+  footer p a:hover {
+    color: #ec6090;
+  }
+
+/* ====================================================== */
+
+
+/* toggle switch*/
 #theme_toggle { display: none; }
 .toggle_switch {
     cursor: pointer;
@@ -203,3 +253,4 @@ border-radius: 23px;
 #theme_toggle:checked+.header-area .main-nav .nav li a{ 
     background:var(--background-color) 
 }
+/* ====================================================== */

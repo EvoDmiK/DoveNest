@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from django.urls import reverse_lazy
 from pathlib import Path
 import os
 
@@ -28,6 +29,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+AUTHENTICATION_BACKENDS = (
+                            'django.contrib.auth.backends.ModelBackend',
+                            'allauth.account.auth_backends.AuthenticationBackend',
+                        )
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,12 +42,38 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'main.apps.MainConfig',
-    'experiment.apps.ExperimentConfig',
+
+    ## 보안 인증관련 앱
     'sslserver',
 
+    ## 프로젝트에 사용되고 있는 앱들
+    'main.apps.MainConfig',
+    'UserProfile.apps.UserprofileConfig',
+    'community.apps.CommunityConfig',
+    'accounts.apps.AccountsConfig',
+    'news.apps.NewsConfig',
 
+    ## 기능 테스트에서 사용하고 있는 앱
+    'experiment.apps.ExperimentConfig',
+
+    ## 소셜 로그인 관련 앱
+    'allauth',
+    'allauth.account',
+    'django.contrib.sites',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.kakao',
 ]
+
+SITE_ID = 1
+
+## 로그인 후 redirect되는 경로
+LOGIN_REDIRECT_URL          = '/'
+
+## 로그아웃 후 redirect되는 경로
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+
+## 로그아웃 버튼 클릭 시 자동 로그아웃
+ACCOUNT_LOGOUT_ON_GET       = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
