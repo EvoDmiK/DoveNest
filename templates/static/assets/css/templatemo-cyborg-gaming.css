@@ -1559,7 +1559,7 @@ Profile Style
   border-bottom: 1px solid #666;
 }
 
-.main-profile ul li span {
+/* .main-profile ul li span {
   float: right;
   font-weight: 500;
   color: #ec6090;
@@ -1569,7 +1569,7 @@ Profile Style
   border-bottom: none;
   padding-bottom: 0;
   margin-bottom: 0;
-}
+} */
 
 .clips {
   margin-top: 30px;

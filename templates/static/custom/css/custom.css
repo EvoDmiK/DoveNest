@@ -11,6 +11,12 @@
     --content-color: #ab6fe3;
 
     --line-color: #fff;
+    --profile-circle-color: #8A2BE2;
+}
+
+::placeholder { 
+    color : var(--background-color); 
+    font-weight: bold;
 }
 
 .darkmode {
@@ -26,6 +32,7 @@
     --content-color: #1f2122;
 
     --line-color: #27292a;
+    --profile-circle-color: #27292a;
 }
 
 body { background:var(--bg-color); }
@@ -68,6 +75,28 @@ body { background:var(--bg-color); }
     border-radius: 18px;
     letter-spacing: .3px;
 }
+.header-area .main-nav .nav li:last-child a {
+    background-color: var(--profile-circle-color);
+    padding: 8px 10px 8px 20px;
+    border-radius: 23px;
+  }
+
+
+.main-profile ul {
+    border-radius: 23px;
+    padding: 30px;
+    background-color: var(--content-color);
+}
+
+.main-profile ul li {
+    width: 100%;
+    font-size: 14px;
+    color: var(--search-icon-color);
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--search-icon-color);
+}
+
 
 .header-area .main-nav .nav li .profile{
     display: block;

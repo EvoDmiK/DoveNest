@@ -2,6 +2,7 @@
 **/*.sqlite3
 api/**/*.json
 **/**/*.jpg
+steam/**/*
 
 ## 실험 코드 보호
 experiment/
