@@ -1,0 +1,58 @@
+{% extends "account/base.html" %}
+{% load static%}
+
+{% load i18n %}
+{% load account socialaccount %}
+
+{% get_providers as socialaccount_providers %}
+{% block content %}
+  <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+
+  <img class="wave" src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/wave.png">
+  <div class="container">
+    <div class="img">
+      <img src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/bg.svg">
+    </div>
+    <div class="login-content">
+      <form class="login" method="POST" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        
+        <img src="https://cdn-icons-png.flaticon.com/512/3804/3804842.png">
+        <h2 class="title">Welcome</h2>
+        <div class="input-div one">
+            <div class="i">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="div">
+              {{ form.login }}
+            </div>
+        </div>
+        <div class="input-div pass">
+            <div class="i"> 
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="div">
+              {{ form.password }}
+            </div>
+        </div>
+        <div class="flex-container">
+          <div class="flex-item">
+            <a class="button secondaryAction forgot" href="{% url 'account_reset_password' %}">
+              {% trans "Forgot Password?" %}
+            </a>
+          </div>
+          <div class="flex-item">
+            <a class="button secondaryAction register" href="{% url 'account_signup' %}">
+              {% trans "Sign Up" %}
+            </a>
+          </div>
+        </div>
+        <button class="primaryAction btn" type="submit">{% trans "Sign In" %}</button>
+        <a class="social-icon" href="{% provider_login_url 'kakao' method='oauth2' %}">
+          <img class="kakao-icon" src="https://cdn.imweb.me/thumbnail/20220403/a8e484f2dfe39.png">
+        </a>
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

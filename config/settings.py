@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 from pathlib import Path
 import os
@@ -34,6 +35,10 @@ AUTHENTICATION_BACKENDS = (
                             'allauth.account.auth_backends.AuthenticationBackend',
                         )
 
+LOCALE_PATHS = (
+                    os.path.join(BASE_DIR, 'templates', 'locale'),
+                )
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,7 +55,6 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'UserProfile.apps.UserprofileConfig',
     'community.apps.CommunityConfig',
-    'accounts.apps.AccountsConfig',
     'news.apps.NewsConfig',
 
     ## 기능 테스트에서 사용하고 있는 앱
@@ -78,6 +82,7 @@ ACCOUNT_LOGOUT_ON_GET       = True
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -90,7 +95,12 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+                    os.path.join(BASE_DIR, 'templates'), 
+                    os.path.join(BASE_DIR, 'templates', 'account'),
+                    os.path.join(BASE_DIR, 'templates', 'openin'),
+                    os.path.join(BASE_DIR, 'templates', 'socialaccount'),
+                ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,7 +149,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-KR'
+LANGUAGES = [
+                ('ko', _('Korean')),
+                ('en', _('English')),
+            ]
 
 TIME_ZONE = 'UTC'
 USE_I18N = True

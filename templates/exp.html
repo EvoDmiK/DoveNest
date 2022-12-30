@@ -6,7 +6,7 @@
             <h2>다크모드 실험을 위한 제목</h2>
             <p>안녕하세요. 다크모드를 도입하기 위한 예제입니다.</p>
             <p>다크모드는 사용자의 눈을 편안하게 해주는 기능을 합니다.</p>
-            <p>오늘은 바로 이 <kbd>다크모드</kbd>를 구현하는 방법을 알아볼 겁니다.</p>
+            <p class = 'hello'>오늘은 바로 이 <kbd>다크모드</kbd>를 구현하는 방법을 알아볼 겁니다.</p>
             <div class="line6">
           <input type="checkbox" id="theme_toggle">
             <label for="theme_toggle" class="toggle2">
@@ -16,47 +16,11 @@
             </div>
           </div>
     </body>
-    <script type="text/javascript" src={% static "custom/custom.js" %}></script>
-    <link href={% static "custom/custom.css" %} rel="stylesheet">
+    <script type="text/javascript" src={% static "custom/js/custom.js" %}></script>
+    <!-- <link href={% static "custom/css/custom.css" %} rel="stylesheet"> -->
 </html>
 
 
-
-
-<!-- <style>
-    .toggleSwitch {
-    width: 100px;
-    height: 50px;
-    display: block;
-    position: relative;
-    border-radius: 30px;
-    background-color: #fff;
-    box-shadow: 0 0 16px 3px rgba(0 0 0 / 15%);
-    cursor: pointer;
-    margin: 30px;
-    }
-
-    .toggleSwitch .toggleButton {
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    top: 50%;
-    left: 4px;
-    transform: translateY(-50%);
-    border-radius: 50%;
-    background: #0000CD;
-    }
-
-    #toggle:checked ~ .toggleSwitch {
-    background: #0000CD;
-    }
-
-    #toggle:checked ~ .toggleSwitch .toggleButton {
-    left: calc(100% - 44px);
-    background: #fff;
-    }
-
-    .toggleSwitch, .toggleButton {
-    transition: all 0.2s ease-in;
-    }
-</style> -->
+<style>
+  h2 {margin-left : 50%;}
+</style>
