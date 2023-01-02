@@ -230,7 +230,7 @@ p label { display: none; }
 
 /* .forgot { float: left;} */
 .kakao-icon {
-      height: 5%;
+      /* width: 30px; */
       margin-left: 5%;
       float: left;
     }
