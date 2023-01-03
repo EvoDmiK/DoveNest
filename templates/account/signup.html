@@ -5,17 +5,78 @@
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
 {% block content %}
-<h1>{% trans "Sign Up" %}</h1>
+  <script src="https://kit.fontawesome.com/a81368914c.js"></script>
 
-<p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+  <img class="wave" src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/wave.png">
+  <div class="container">
+    <div class="img">
+      <img src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/bg.svg">
+    </div>
+    <div class="login-content">
+      <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+        
+        <img src="https://cdn-icons-png.flaticon.com/512/3804/3804842.png">
+        <h2 class="title">{% trans "Sign Up" %}</h2>
+        <div class="input-div one">
+            <div class="i">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="div">
+              {{ form.username }}
+            </div>
+        </div>
 
-<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-  {% csrf_token %}
-  {{ form.as_p }}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-  <button type="submit">{% trans "Sign Up" %} &raquo;</button>
-</form>
+        <!-- email 주소 입력창 -->
+        <div class="input-div pass">
+            <div class="i"> 
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="div">
+              {{ form.email }}
+            </div>
+        </div>
+
+        <!-- 비밀번호 입력창 -->
+        <div class="input-div pass">
+          <div class="i"> 
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="div">
+            {{ form.password1 }}
+          </div>
+        </div>
+
+        <!-- 비밀번호 확인 입력창 -->
+        <div class="input-div pass">
+          <div class="i"> 
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="div">
+            {{ form.password2 }}
+          </div>
+        </div>
+
+
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+      
+        <div class="flex-container">
+          <div class="flex-item">
+            <p class="already">이미 계정이 있으신가요?</p>
+          </div>
+          <div class="flex-item ">
+            <a class="signin" href="{{ login_url }}">{% trans "Sign In"%}</a>
+          </div>  
+        </div>
+        <button class="primaryAction btn" type="submit">{% trans "Sign Up" %} &raquo;</button>
+
+      </form>
+
+    </div>
+  </div>
 
 {% endblock %}
+
+

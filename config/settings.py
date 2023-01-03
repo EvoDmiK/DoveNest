@@ -60,6 +60,9 @@ INSTALLED_APPS = [
     ## 기능 테스트에서 사용하고 있는 앱
     'experiment.apps.ExperimentConfig',
 
+    ## 스팀 게임관련 앱
+    'gamedb.apps.GamedbConfig',
+
     ## 소셜 로그인 관련 앱
     'allauth',
     'allauth.account',

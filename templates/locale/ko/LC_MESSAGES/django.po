@@ -854,6 +854,11 @@ msgstr "해당 소셜 계정이 이미 다른 계정에 연결되어 있습니�
 msgid "The social account has been disconnected."
 msgstr "소셜 계정 연결이 해제되었습니다."
 
+#: templates/account/signup.html:67
+msgid  "Already have an account?"
+msgstr "이미 계정이 있으신가요?"
+
+
 #: templates/socialaccount/signup.html:10
 #, python-format
 msgid ""
