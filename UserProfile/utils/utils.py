@@ -19,7 +19,7 @@ JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/keys'
 ## api URL들을 저장해주는 딕셔너리
 URLS = {
     'library'    : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
-    'getsummary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
+    'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
 }
 
 
@@ -36,16 +36,12 @@ save_json     = lambda data, json_path: json.dump(data, open(json_path, 'w'))
 get_api       = lambda url: return_or_print(requests.get(url))
 
 
-## 게임 개수 반환해주는 함수
-num_games     = lambda library: len(library)
-
-
 ## key를 담고 있는 json 파일이 깨지거나 한 경우에 복구시켜 주는 함수
 def repair_keys(json_path):
     try: keys = load_json(f'{json_path}/keys.json')
         
     except Exception as e:
-        print(f'[ERR.K-002] json 파일이 깨져 열 수 없습니다. {e}')
+        print(f'[ERR.K.A-001] json 파일이 깨져 열 수 없습니다. {e}')
         text = open(f'{JSON_BACKUP_PATH}/keys.txt', 'r').read().split('\n')
         keys = {platform : key 
                 for platform, key in zip(['youtube', 'steam'], text)}
@@ -68,7 +64,7 @@ def get_key():
         key = repair_keys(JSON_PATH)['steam']
             
     else:
-        print(f'[ERR.K-001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
+        print(f'[WARN.K.A-001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
         key = repair_keys(JSON_BACKUP_PATH)['steam']  
     
     return key
@@ -140,7 +136,9 @@ def most_played(library, platform = 'steam'):
             
             information.append(info)
 
-        except: print(f'[K.L-001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다.')
+        except:
+            pass 
+            # print(f'[WARN.K.L-001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다.')
 
     return information
 
@@ -161,7 +159,8 @@ def get_stats(library, platform = 'steam'):
 
             num_games += 1
         except Exception as e:
-            print(f'[K.L-001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
+            pass
+            # print(f'[WARN.K.L-001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
 
     genres, developers = Counter(genres), Counter(developers)
     return genres, developers, num_games

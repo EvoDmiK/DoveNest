@@ -27,7 +27,7 @@ urlpatterns = [
     path('', include('main.urls')),
 
     ## 실험 페이지
-    path('exp/', include('experiment.urls'), name='exp'),
+    path('exp/', include('experiment.urls')),
 
     ## 소셜 로그인 관련 페이지들
     re_path(r'^accounts/', include('allauth.urls')),
