@@ -163,6 +163,11 @@ border-radius: 23px;
     padding-bottom: 20px;
 }
 
+.gaming-library .item ul li span {
+    color: #ff0;
+    font-size: 14px;
+  }
+
 .featured-games {
     border-radius: 23px;
     background-color: var(--content-color);

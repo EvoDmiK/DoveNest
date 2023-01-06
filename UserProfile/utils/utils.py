@@ -1,20 +1,27 @@
+from collections import Counter
 from datetime import datetime
 import traceback
+import math as mt
 import requests
 import os, re
 import time
 import json
 
 ROOT_PATH  = '/config/workspace/project'
+
+## 미리 API를 통해 받아둔 게임 정보 JSON파일 경로
 DATA_PATH  = f'{ROOT_PATH}/DoveNest/steam/jsons'
 
+## youtube, steam API key를 저장하고 있는 경로
 JSON_PATH        = f'{ROOT_PATH}/utils/keys'
 JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/keys'
 
 ## api URL들을 저장해주는 딕셔너리
 URLS = {
-    'library' : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001'
+    'library'    : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
+    'getsummary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
 }
+
 
 ## 유닉스 포맷의 시간 데이터를 파이썬의 datetime 포맷으로 변경시켜주는 함수
 unix2datetime = lambda unixtime: str(datetime.fromtimestamp(unixtime))
@@ -27,6 +34,10 @@ save_json     = lambda data, json_path: json.dump(data, open(json_path, 'w'))
 
 ## api url을 입력하여 호출해주는 함수
 get_api       = lambda url: return_or_print(requests.get(url))
+
+
+## 게임 개수 반환해주는 함수
+num_games     = lambda library: len(library)
 
 
 ## key를 담고 있는 json 파일이 깨지거나 한 경우에 복구시켜 주는 함수
@@ -104,3 +115,53 @@ def get_user_library(key, user_id):
             print(traceback.format_exc(), e)
             
     return user_datas
+
+
+## 가장 많이 플레이한 게임 리스트 5개 반환해주는 함수
+def most_played(library, platform = 'steam'):
+
+    library = sorted(library, key = lambda x: x[1], reverse = True)[:5]
+    information = []
+
+    for lib in library:
+        appid, played_time, last_played = lib
+        
+        try:
+            datas       = load_json(f'{DATA_PATH}/{appid}/{appid}.json')
+            played_time = f'{mt.ceil(played_time / 60)} 시간' if played_time / 60 > 1 else f'{int(played_time)} 분'
+
+            info  = {   
+                        'image' : datas['header_image'],
+                        'name'  : datas['name'],
+                        'genre' : ", ".join([data['description'] for data in datas['genres']]),
+                        'played_time' : played_time,
+                        'last_played' : last_played
+                    }
+            
+            information.append(info)
+
+        except: print(f'[K.L-001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다.')
+
+    return information
+
+
+## 게임 관련 통계 만들어주는 함수
+def get_stats(library, platform = 'steam'):
+    
+    genres, developers = [], []
+    num_games = 0
+
+    for lib in library:
+        appid, _, _ = lib
+        
+        try:
+            datas = load_json(f'{DATA_PATH}/{appid}/{appid}.json')
+            genres     += [data['description'] for data in datas['genres']]
+            developers += [data  for  data  in datas['developers']]
+
+            num_games += 1
+        except Exception as e:
+            print(f'[K.L-001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
+
+    genres, developers = Counter(genres), Counter(developers)
+    return genres, developers, num_games
