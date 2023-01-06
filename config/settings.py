@@ -131,6 +131,28 @@ DATABASES = {
 }
 
 
+## 로깅용 설정
+LOGGING = {
+    'version' : 1,
+
+    ## 기존의 로거들 비활성화 (이전 버전과의 호환성 문제로 설정)
+    'disable_existing_loggers' : False,
+    'handlers' : {
+        'console' : {
+            'class' : 'logging.StreamHandler'
+        },
+    },
+
+    'loggers' : {
+        'my_logger' : {
+            'handlers' : ['console'],
+            'level' : 'INFO'
+        }
+    }
+
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
