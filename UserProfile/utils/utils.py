@@ -10,7 +10,7 @@ import json
 ROOT_PATH  = '/config/workspace/project'
 
 ## 미리 API를 통해 받아둔 게임 정보 JSON파일 경로
-DATA_PATH  = f'{ROOT_PATH}/DoveNest/steam/jsons'
+DATA_PATH  = f'{ROOT_PATH}/DoveNest/informations/jsons'
 
 ## youtube, steam API key를 저장하고 있는 경로
 JSON_PATH        = f'{ROOT_PATH}/utils/keys'

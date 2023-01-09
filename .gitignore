@@ -1,7 +1,7 @@
 ## 데이터 보호
-steam/jsons/**/* 
+informations/jsons/**/* 
 **/*.sqlite3
-steam/logs/*
+informations/logs/*
 **/**/*.jpg
 
 
