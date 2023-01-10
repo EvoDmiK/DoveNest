@@ -55,7 +55,7 @@ def save_json(idx, games):
         appid     = game['appid']
         
         try:
-            json_path = f'jsons/{appid}' 
+            json_path = f'../jsons/{appid}' 
             
             try:
                 info = get_info(appid)[str(appid)]['data']

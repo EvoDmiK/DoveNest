@@ -18,7 +18,8 @@ JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/keys'
 
 ## api URL들을 저장해주는 딕셔너리
 URLS = {
-    'library'    : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
+    'library'     : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
+    'sales'       : 'http://store.steampowered.com/api/featuredcategories/?l=koreana',
     'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
 }
 
@@ -129,7 +130,7 @@ def most_played(library, platform = 'steam'):
             info  = {   
                         'image' : datas['header_image'],
                         'name'  : datas['name'],
-                        'genre' : ", ".join([data['description'] for data in datas['genres']]),
+                        'genre' : ', '.join([data['description'] for data in datas['genres']]),
                         'played_time' : played_time,
                         'last_played' : last_played
                     }
