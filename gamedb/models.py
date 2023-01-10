@@ -13,3 +13,5 @@ class SteamDB(models.Model):
 
     
     def __len__(self): return len(self.appid)
+
+

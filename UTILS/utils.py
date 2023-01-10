@@ -18,8 +18,8 @@ JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/keys'
 
 ## api URL들을 저장해주는 딕셔너리
 URLS = {
-    'library'     : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
     'sales'       : 'http://store.steampowered.com/api/featuredcategories/?l=koreana',
+    'library'     : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
     'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
 }
 
@@ -130,7 +130,7 @@ def most_played(library, platform = 'steam'):
             info  = {   
                         'image' : datas['header_image'],
                         'name'  : datas['name'],
-                        'genre' : ', '.join([data['description'] for data in datas['genres']]),
+                        'genre' : ', '.join([data['description'] for data in datas['genres']][:3]),
                         'played_time' : played_time,
                         'last_played' : last_played
                     }
@@ -165,3 +165,40 @@ def get_stats(library, platform = 'steam'):
 
     genres, developers = Counter(genres), Counter(developers)
     return genres, developers, num_games
+
+
+## 현재 스팀에서 가장 인기 있는 게임들
+def top_sellers(platform = 'steam'):
+    sales = get_api(URLS['sales'])
+
+    top_sellers, top_names = [], []
+    for game in sales['top_sellers']['items'][:3]:
+
+        appid = game['id']
+        name  = game['name']
+
+        try:
+            datas     = get_info(appid)
+            genre     = ', '.join([data['description'] for data in datas['genres']][:3])
+
+        
+        except Exception as e:
+            genre     = f'{platform}에서 제공하지 않음.'
+            print(e)
+
+    
+        info  = {   
+                    'image'  : game['header_image'],
+                    'name'       : name,
+                    'genre'      : genre,
+                    'discounted' : game['discounted'],
+                }
+
+        if name not in top_names:
+            top_sellers.append(info)
+            top_names.append(name)
+
+        else:
+            print(f'[WRN.D-001] 중복된 데이터 입니다. {name}')
+
+    return top_sellers

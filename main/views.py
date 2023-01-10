@@ -1,8 +1,12 @@
 from django.shortcuts import render
-from UserProfile.utils import utils
 from datetime import datetime
+from UTILS import utils
 # Create your views here.s
 
 def home(request):
-
-    return render(request, 'home.html', context = {})
+    
+    top_sellers = utils.top_sellers()
+    context   = {
+                    'top_sellers' : top_sellers
+                }
+    return render(request, 'home.html', context = context)

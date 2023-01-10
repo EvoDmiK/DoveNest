@@ -1,11 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from datetime import datetime
-from .utils import utils
+from UTILS import utils
 import json
 
 KEY     = utils.get_key()
-USER_ID = 76561198032052956
+USER_ID = 76561198804867273
 
 def profile(request):
 

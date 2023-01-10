@@ -1,8 +1,13 @@
 ## 데이터 보호
 informations/jsons/**/* 
-**/*.sqlite3
+informations/**/*.json
+informations/**/*.sql
+informations/**/*.db
 informations/logs/*
+informations/db/*
+**/*.sqlite3
 **/**/*.jpg
+
 
 
 ## 실험 코드 보호
