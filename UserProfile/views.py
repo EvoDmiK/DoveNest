@@ -9,10 +9,10 @@ USER_ID = 76561198804867273
 
 def profile(request):
 
-    library     = utils.get_user_library(KEY, USER_ID)
-    most_played = utils.most_played(library)
+    library     = utils.SteamAPI.get_user_library(KEY, USER_ID)
+    most_played = utils.SteamAPI.most_played(library)
 
-    genre_stat, developer_stat, num_games  = utils.get_stats(library)
+    genre_stat, developer_stat, num_games  = utils.SteamAPI.get_stats(library)
     context = {
             'datas'          : most_played,
             'num_games'      : num_games,
@@ -30,10 +30,10 @@ def ajax_profile(request):
         print(f'Ajax 민수야 고맙다 : {tag_id}')
 
         if tag_id.lower() == "steam":
-            library     = utils.get_user_library(KEY, USER_ID)
-            most_played = utils.most_played(library)
+            library     = utils.SteamAPI.get_user_library(KEY, USER_ID)
+            most_played = utils.SteamAPI.most_played(library)
 
-            genre_stat, developer_stat, num_games  = utils.get_stats(library)
+            genre_stat, developer_stat, num_games  = utils.SteamAPI.get_stats(library)
             context = {
                     'datas'           : most_played,
                     'num_games'       : num_games,
