@@ -5,7 +5,7 @@ from UTILS import utils
 
 def home(request):
     
-    top_sellers = utils.top_sellers()
+    top_sellers = utils.SteamAPI.top_sellers()
     context   = {
                     'top_sellers' : top_sellers
                 }

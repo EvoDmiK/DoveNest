@@ -22,6 +22,7 @@ def profile(request):
     return render(request, 'profile.html', context = context)
 
 
+## Ajax 통신을 통해서 태그 id에 따라 데이터 다르게 전송하도록 하려 시도중.
 def ajax_profile(request):
 
     if request.method == "POST":
