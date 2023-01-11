@@ -4,7 +4,7 @@
 
 ## 자료 출처
 ### 1. 템플릿
-- made agency portfolio : [[템플릿 링크]](https://bootstrapthemes.co/item/made-agency-portfolio-free-bootstrap-template/)
+- Themewagon - Cyborg : [[템플릿 링크]](https://themewagon.com/themes/free-responsive-bootstrap-5-gaming-website-template-cyborg/)
 
 
 ## :+1: Special Thanks

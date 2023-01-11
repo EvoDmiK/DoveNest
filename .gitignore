@@ -8,8 +8,6 @@ informations/db/*
 **/*.sqlite3
 **/**/*.jpg
 
-
-
 ## 실험 코드 보호
 experiment/
 
@@ -21,8 +19,10 @@ experiment/
 ## 로그파일 보호
 **/*.out
 **/*.txt
+**/*.log
 
 ## 그냥 내가 보기 싫어서 없애둔 것들
 **/.ipynb_checkpoints
 **/**/*-checkpoint*
+**/Untitled.ipynb
 **/**/*.pyc

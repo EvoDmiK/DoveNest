@@ -11,23 +11,26 @@ ROOT_PATH = f'/config/workspace/project/DoveNest/informations/'
 NOW     = datetime.now()
 Y, M, D = NOW.year, NOW.month, NOW.day
 
-TABLE_NAME = 'steamsale'
-os.makedirs(f'{ROOT_PATH}/db/steam', exist_ok = True)
+TABLE_NAME = 'saleinfo'
+DB_NAME    = 'game_informations'
+
+os.makedirs(f'{ROOT_PATH}/db', exist_ok = True)
 
 class saleDB:
 
+    ## DB와 연결시켜주는 함수
     def connect_db():
 
-        dbpath = f'{ROOT_PATH}/db/steam/{TABLE_NAME}.db'
+        dbpath = f'{ROOT_PATH}/db/{DB_NAME}.db'
         conn   = sqlite3.connect(dbpath)
         cursor = conn.cursor()
 
         return cursor, conn
 
-    
+    ## 테이블 만들어주는 함수
     def create_table():
         
-        cursor, _ = saleDB.connect_db()
+        cursor, conn = saleDB.connect_db()
         query = f"""
                     CREATE TABLE IF NOT EXISTS {TABLE_NAME}(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,11 +38,12 @@ class saleDB:
                     percent INTEGER NOT NULL,
                     original INTEGER NOT NULL,
                     discounted INTEGER NOT NULL,
-                    date DATE NOT NULL);
+                    platform TEXT NOT NULL, 
+                    date TEXT NOT NULL);
                 """
 
         cursor.execute(query)
-        return cursor
+        return cursor, conn
 
 
     ## 테이블에 데이터 입력해주는 함수
@@ -60,7 +64,7 @@ class saleDB:
         
         _, conn = saleDB.connect_db()
         with conn:
-            with open(f'{ROOT_PATH}/db/steam/{TABLE_NAME}.sql', 'w') as f:
+            with open(f'{ROOT_PATH}/db/{DB_NAME}.sql', 'w') as f:
                 for line in conn.iterdump():
                     f.write('%s\n' % line)
 
@@ -72,6 +76,7 @@ class saleDB:
 def discount_scraping():
     whole_page = ""
 
+    ## 총 5페이지 긁어옴.
     for idx in range(5):
         url = f'https://store.steampowered.com/search/?specials=1&filter=topsellers&page={idx}'
         res = req.get(url)
@@ -95,8 +100,8 @@ def preprop(string, dtype = 'discount'):
 ## 스크래핑 된 데이터에서 필요한 정보만 긁어오는 함수
 def get_salelist(): 
 
-    cursor = saleDB.create_table()
-    sales  = discount_scraping()
+    cursor, conn = saleDB.create_table()
+    sales        = discount_scraping()
 
     for idx, sale in enumerate(sales):
         try:
@@ -108,23 +113,29 @@ def get_salelist():
             original   = preprop(sale.select('strike')[0].text)
             discounted = preprop(sale.select(".discounted")[0].text, dtype="discount")
             
-            today = f'{Y}-{str(M).zfill(2)}-{str(D).zfill(2)}'
-            saleDB.insert_table(cursor, (appid, percent, original, discounted, today))
-        
+            today = f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
+
+            query = f"""
+            INSERT INTO {TABLE_NAME}
+            (appid, percent, original, discounted, platform, date)
+            VALUES({appid}, {percent}, {original}, {discounted}, 'steam', {today});
+            """
+            cursor.execute(query)
+
+
         except Exception as e: print(f'[error] {e}')
 
-    query = "SELECT * FROM steamsale"
+    query = f"SELECT * FROM {TABLE_NAME}"
     cursor.execute(query)
 
     print(cursor.fetchall())
+    conn.commit()
     saleDB.backup_table()
 
-schedule.every(1).minutes.do(get_salelist)
+## 매일 오전 10시에 데이터 가져오는 함수 실행
+schedule.every().day.at("10:00").do(get_salelist)
 
 while True:
-    now = datetime.now()
-    Y, M, D = now.year, now.month, now.day
-    h, m    = now.hour, now.minute  
 
     schedule.run_pending()
     time.sleep(1)
