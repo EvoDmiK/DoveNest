@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div id="js-preloader" class="js-preloader">
+        <div class="preloader-inner">
+        <span class="dot"></span>
+        <div class="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row" >
+            <div class="col-lg-12">
+                <div class="page-content" style="margin-top: 13%;">
+                    <div class="sale-info">
+                        <table class="sale-info-table">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th>번호</th>
+                                    <th>썸네일</th>
+                                    <th>이름</th>
+                                    <th>장르</th>
+                                    <th>원본 가격</th>
+                                    <th>할인율</th>
+                                    <th>할인 가격</th>
+                                    <th>링크</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if datas%}
+                                    {% for data in datas %}
+                                        {{ data }}
+                                    {% endfor%}
+                                {% else %}
+                                    오늘의 할인 정보가 없습니다.
+                                {% endif%}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src={% static "vendor/bootstrap/js/bootstrap.min.js" %}></script>
+
+    <script src={% static "assets/js/isotope.min.js" %}></script>
+    <script src={% static "assets/js/owl-carousel.js" %}></script>
+    <script src={% static "assets/js/tabs.js" %}></script>
+    <script src={% static "assets/js/popup.js" %}></script>
+    <script src={% static "assets/js/custom.js" %}></script>
+
+    <script type="text/javascript" src={% static "custom/js/custom.js" %}></script>
+    <link href={% static "custom/css/custom.css" %} rel="stylesheet">
+{% endblock %}

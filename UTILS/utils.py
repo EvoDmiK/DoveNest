@@ -1,7 +1,8 @@
 from collections import Counter
 from datetime import datetime
-import traceback
+import numpy as np
 import math as mt
+import traceback
 import requests
 import sqlite3
 import os, re
@@ -221,20 +222,101 @@ class salesDB:
 
         self.table_name = table_name
         self.db_name    = db_name
+        
+        ## DataBase 연결
+        self.connect_db()
 
 
     ## DB와 연결시켜주는 함수
     def connect_db(self):
 
         dbpath = f'{DB_PATH}/{self.db_name}.db'
-        self.conn   = sqlite3.connect(dbpath)
-        self.cursor = conn.cursor()
+        self.conn   = sqlite3.connect(dbpath, check_same_thread = False)
+        self.cursor = self.conn.cursor()
 
 
-    ## DB에 있는 데이터를 조회하는 함수
-    def search_table(self, column = '*', condition = None):
+    ## DB에 있는 데이터를 조회하는 함수 고급 쿼리 부분은 좀 더 구현해야 한다.
+    def search_table(self, columns = '*', **kwargs):
+
+        ## keyword argument 값에서 데이터가 없는 경우 기본값 지정
+
+        ## 이부분도 너무 킹받게 짜졌다,, 안되는거 그냥 덕지덕지 수정했더니...
+        sorting_col = kwargs['sorting_col'] if 'sorting_col' in kwargs.keys() else columns
+        sorting_col = sorting_col if sorting_col != '*' else  \
+                    ('appid' if type(sorting_col) != list else sorting_col[0])
+
+        conditions  = kwargs['conditions']  if 'conditions' in kwargs.keys() else None
+        how_many    = kwargs['how_many']    if 'how_many' in kwargs.keys() else 1
+        reverse     = kwargs['desc']        if 'desc' in kwargs.keys() else False
+
         
-        if condition != None:
-            query = f"""
-                        SELECT {column} FROM {self.table_name}
-                    """
+        col_indexes = {k : v for v, k in enumerate(['id', 'appid', 'percent', 'original', 
+                                                    'discounted', 'date'])}
+
+        ## 코드가 너무 킹받게 짜졌다..
+        col_indexes = col_indexes if columns == '*' else \
+                    ({k : v for v, k in enumerate(columns)} \
+                    if type(columns) == list else {columns : 0})
+
+        col_keys = [col for col in col_indexes.keys()]
+        try:
+            print(sorting_col, col_keys)
+            assert sorting_col in col_keys, f'''\n[ERR.DB.Co-0001] 선택하신 조건에 맞는 컬럼이 존재하지 않아 선택 하신 옵션으로 정렬 할 수 없었습니다. \
+                                                {col_keys}에서 골라 주십시오.'''
+
+            columns = ', '.join(columns) if type(columns) == list else columns
+
+
+            ## 데이터 조회할 때 그 어떤 조건도 없는 경우 그냥 테이블에서 컬럼만 받아 사용
+            if conditions == None:
+                query = f"""
+                            SELECT {columns} FROM {self.table_name}
+                        """
+            
+            else:
+                ## 고급 쿼리에 사용할 거
+                conditions = np.array(conditions)
+
+                ## WHERE 문으로 찾을 column, 조건, 데이터를 받아 조회해준다.
+                if len(conditions) == 3:
+                    col, cond, data = conditions
+
+                    symbols = ['>', '<', '!=', '=', '>=', '<=', 'IN']
+                    assert cond in symbols, f'\n[ERR.DB.Co-0002] 조건이 올바르지 않습니다. {symbols}에서 선택해 넣어주십시오.'
+            
+                    
+                    query = f"""
+                                SELECT {columns} FROM {self.table_name}
+                                WHERE {col} {cond} {data};
+                            """
+                
+                ## 데이터를 찾을 column과 찾을 data만 있는 경우
+                ## 기본값으로 동일한 데이터만 찾도록 지정해주었다.
+                elif len(conditions) == 2:
+                    col, data = conditions
+                    query = f"""
+                                SELECT {columns} FROM {self.table_name}
+                                WHERE {col}={data};
+                            """
+
+            self.cursor.execute(query)
+            
+            ## 데이터 정렬에 사용할 인덱스 값들.
+            col_index = col_indexes[sorting_col]
+
+        except Exception as e:
+            print(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정바랍니다. {e}')
+            query     = f'SELECT * FROM {self.table_name}'
+            col_index = 0
+
+        ## how_many가 0을 포함한 음의 정수가 된다면 모든 데이터를 조회해준다.
+        return sorted(self.cursor.fetchmany(how_many), 
+                      key = lambda x: x[col_index], reverse = reverse) 
+
+
+if __name__ == '__main__':
+    DB     = salesDB(table_name = 'saleinfo', db_name = 'game_informations')
+    result = DB.search_table(columns = ['appid', 'percent', 'discounted'],
+                                conditions = ['percent', '<', 5000], how_many = 5)
+
+    print(result)

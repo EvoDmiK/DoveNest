@@ -23,6 +23,7 @@ urlpatterns = [
     ## 구현할 페이지들 ''은 메인 페이지
     path('community/', include('community.urls')),
     path('profile/', include('UserProfile.urls')),
+    path('sales/', include('gamedb.urls')),
     path('news/', include('news.urls')),
     path('', include('main.urls')),
 
