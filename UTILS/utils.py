@@ -178,28 +178,33 @@ class SteamAPI:
         return genres, developers, num_games
 
 
-    ## 현재 스팀에서 가장 인기 있는 게임들
-    def top_sellers(platform = 'steam'):
-        sales = get_api(SteamAPI.URLS['sales'])
+    ## 게임에서 장르 가져와주는 함수
+    def get_genre(appid, platform, datas = None):
+        try:
+            if datas == None: datas     = SteamAPI.get_info(appid)
+            genre     = ', '.join([data['description'] for data in datas['genres']][:3])
 
-        top_sellers, top_names = [], []
-        for game in sales['top_sellers']['items'][:3]:
+    
+        except Exception as e:
+            genre     = f'{platform}에서 제공하지 않음.'
+            print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
+
+        return genre
+
+
+    ## 현재 스팀에서 가장 인기 있는 게임들
+    def get_trendy(sales, platform, top_sellers, top_names, nums):
+        
+        num1, num2 = nums
+        for game in sales['top_sellers']['items'][num1 : num2]:
 
             appid = game['id']
             name  = game['name']
 
-            try:
-                datas     = get_info(appid)
-                genre     = ', '.join([data['description'] for data in datas['genres']][:3])
+            genre = SteamAPI.get_genre(appid, platform)
 
-            
-            except Exception as e:
-                genre     = f'{platform}에서 제공하지 않음.'
-                print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
-
-        
             info  = {   
-                        'image'  : game['header_image'],
+                        'image'      : game['header_image'],
                         'name'       : name,
                         'genre'      : genre,
                         'discounted' : game['discounted'],
@@ -212,7 +217,7 @@ class SteamAPI:
             else:
                 print(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
 
-        return top_sellers
+        return top_sellers, top_names
 
 
 ## 할인 DB 관련 클래스 생성
@@ -270,7 +275,7 @@ class salesDB:
             ## 데이터 조회할 때 그 어떤 조건도 없는 경우 그냥 테이블에서 컬럼만 받아 사용
             if conditions == None:
                 query = f"""
-                            SELECT {columns} FROM {self.table_name}
+                            SELECT DISTINCT {columns} FROM {self.table_name}
                         """
             
             else:
@@ -286,7 +291,7 @@ class salesDB:
             
                     
                     query = f"""
-                                SELECT {columns} FROM {self.table_name}
+                                SELECT DISTINCT {columns} FROM {self.table_name}
                                 WHERE {col} {cond} {data};
                             """
                 
@@ -295,7 +300,7 @@ class salesDB:
                 elif len(conditions) == 2:
                     col, data = conditions
                     query = f"""
-                                SELECT {columns} FROM {self.table_name}
+                                SELECT DISTINCT {columns} FROM {self.table_name}
                                 WHERE {col}={data};
                             """
 
@@ -312,11 +317,3 @@ class salesDB:
         ## how_many가 0을 포함한 음의 정수가 된다면 모든 데이터를 조회해준다.
         return sorted(self.cursor.fetchmany(how_many), 
                       key = lambda x: x[col_index], reverse = reverse) 
-
-
-if __name__ == '__main__':
-    DB     = salesDB(table_name = 'saleinfo', db_name = 'game_informations')
-    result = DB.search_table(columns = ['appid', 'percent', 'discounted'],
-                                conditions = ['percent', '<', 5000], how_many = 5)
-
-    print(result)

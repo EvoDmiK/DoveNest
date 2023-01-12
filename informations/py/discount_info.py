@@ -8,8 +8,6 @@ import time
 import os
 
 ROOT_PATH = f'/config/workspace/project/DoveNest/informations/'
-NOW     = datetime.now()
-Y, M, D = NOW.year, NOW.month, NOW.day
 
 TABLE_NAME = 'saleinfo'
 DB_NAME    = 'game_informations'
@@ -71,13 +69,12 @@ class saleDB:
                 print('[INFO] DB backup complete!')
 
 
-
 ## 스팀 세일 페이지에서 데이터 스크래핑 해서 가져오는 함수
 def discount_scraping():
     whole_page = ""
 
     ## 총 5페이지 긁어옴.
-    for idx in range(5):
+    for idx in range(1, 10):
         url = f'https://store.steampowered.com/search/?specials=1&filter=topsellers&page={idx}'
         res = req.get(url)
         whole_page += res.text
@@ -99,6 +96,8 @@ def preprop(string, dtype = 'discount'):
 
 ## 스크래핑 된 데이터에서 필요한 정보만 긁어오는 함수
 def get_salelist(): 
+    NOW     = datetime.now()
+    Y, M, D = NOW.year, NOW.month, NOW.day
 
     cursor, conn = saleDB.create_table()
     sales        = discount_scraping()
@@ -132,7 +131,9 @@ def get_salelist():
     conn.commit()
     saleDB.backup_table()
 
-## 매일 오전 10시에 데이터 가져오는 함수 실행
+
+
+# ## 매일 오전 10시에 데이터 가져오는 함수 실행
 schedule.every().day.at("10:00").do(get_salelist)
 
 while True:

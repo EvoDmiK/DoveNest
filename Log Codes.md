@@ -33,10 +33,10 @@
 - <span style="color: yellow">[WARN.D.A-0001] : steam API에서 전체 appid 목록을 조회했을때는 나오지만, 디테일한 정보를 얻을 때는 존재하지 않는 데이터</span>
     - [로그 위치 1] UTILS/utils.py -> SteamAPI 클래스 -> most_played 함수
     - [로그 위치 2] UTILS/utils.py -> SteamAPI 클래스 -> get_stats 함수
-    - [로그 위치 3] UTILS/utils.py -> SteamAPI 클래스 -> top_sellers 함수
+    - [로그 위치 3] UTILS/utils.py -> SteamAPI 클래스 -> get_genre 함수
 
 - <span style="color: yellow">[WARN.D-0001] : 중복된 데이터 일 때</span>
-    - [로그 위치 1] UTILS.utils.py -> SteamAPI 클래스 -> top_sellers 함수
+    - [로그 위치 1] UTILS.utils.py -> SteamAPI 클래스 -> get_trendy 함수
 
 
 # 3. DB 관련 로그

@@ -175,7 +175,7 @@ border-radius: 23px;
 
 .top-downloaded {
     border-radius: 23px;
-    background-color: #1f2122;
+    background-color: var(--content-color);
     padding: 30px;
     max-height: 567px;
     min-height: 567px;
