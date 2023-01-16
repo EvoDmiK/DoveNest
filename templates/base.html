@@ -31,17 +31,18 @@
                                 <li><a href="{% url 'news:news' %}">뉴스</a></li>
                                 <li><a href="{% url 'community:community' %}">커뮤니티</a></li>
                                 <li><a href="{% url 'gamedb:saledb' %}">오늘의 할인정보</a></li>
+                                {% if request.user.is_authenticated %}
+                                    <li><a href="{% url 'account_logout' %}">로그아웃</a></li>
+                                {% else%}
+                                    <li><a href="{% url 'account_login' %}">로그인</a></li>
+                                {% endif %}
                                 <li>
                                     <!-- 로그인되어 있으면 프로필 페이지, 아니면 로그인 페이지로 이동 -->
                                     {% if request.user.is_authenticated %}
                                         <a class="profile" href="{% url 'profile:profile' %}">
+                                            <img src={% static "assets/images/default.png" %} alt="">
                                             {{ request.user.username }}
-                                            <a href="{% url 'account_logout' %}">
-                                                <img src={% static "assets/images/default.png" %} alt="">
-                                            </a>
                                         </a>
-                                    {% else %}
-                                        <a class="profile" href="{% url 'account_login' %}">로그인</a>
                                     {% endif %}
                                 </li>
                             </ul>   

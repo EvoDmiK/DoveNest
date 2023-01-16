@@ -16,12 +16,12 @@
     <div class="container">
         <div class="row" >
             <div class="col-lg-12">
-                <div class="page-content" style="margin-top: 13%;">
+                <div class="page-content" style="margin-top: 10%;">
                     <div class="sale-info">
-
+                        
                         <table class="sale-info-table">
                             <thead>
-                                <tr class="table-dark">
+                                <tr class="sale-table-head">
                                     <th>번호</th>
                                     <th>썸네일</th>
                                     <th>이름</th>
@@ -36,13 +36,15 @@
                                 {% if datas%}
                                     {% for data in datas %}
                                         <tr>
-                                            <td class = 'table-index'.    >{{ forloop.counter }}</td>
-                                            <td class = 'table-thumbnail' ><img src = {{ data.image }}></td>
-                                            <td class = 'table-name'      >{{ data.name }}</td>
-                                            <td class = 'table-genre'     >{{ data.genre }}</td>
-                                            <td class = 'table-original'  >{{ data.original }}</td>
+                                            <!-- 페이지가 넘어가면 id가 21이 아닌, 0부터 시작되어 start index와 forloop을 더해줌. -->
+                                            <td class = 'table-index'>{{ forloop.counter0|add:datas.start_index }}</td>
+                                            <td class = 'table-thumbnail'><img src={{ data.image }}></td>
+                                            <td class = 'table-name'>{{ data.name }}</td>
+                                            <td class = 'table-genre'>{{ data.genre }}</td>
+                                            <td class = 'table-original'>{{ data.original }}</td>
                                             <td class = 'table-percentage'>{{ data.percentage }}</td>
-                                            <td class = 'table-discounted'>{{ data.discounted }}</td>                                            
+                                            <td class = 'table-discounted'>{{ data.discounted }}</td>
+                                            <td class = 'table-seteam-page'><a href = {{ data.steam_page }}><img src={% static "custom/images/logos/steam.png" %}></a></td>                                
                                         </tr>
                                     {% endfor%}
                                 {% else %}
@@ -57,17 +59,17 @@
                             <!-- 이전 페이지가 있는 경우에 -->
                             {% if datas.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ datas.previous_page_number}}"> |< </a>
+                                    <a class="page-link" href="?page=1"> |<< </a>
                                 </li>
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <a class="page-link" tabindex="-1" aria-disabled="true" href="#"> |< </a>
+
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ datas.previous_page_number }}"> |< </a>
                                 </li>
                             {% endif %}
 
                             <!-- 페이지 리스트 제작하는 부분 -->
                             {% for page_num in datas.paginator.page_range %}
-                                {% if page_num >= datas.number|add:-5 and page_num <= datas.number|add:5 %}
+                                {% if page_num >= datas.number|add:-3 and page_num <= datas.number|add:3 %}
                                     <!-- 페이지 넘버와 현재 들어와 있는 페이지 번호가 동일한 경우 -->
                                     {% if page_num == datas.number %}
                                         <li class="page-item active" aria-current="page">
@@ -86,10 +88,11 @@
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ datas.next_page_number }}">>|</a>
                                 </li>
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="?page={{ datas.next_page_number }}">>|</a>
+
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ last_page }}">>>| </a>
                                 </li>
+
                             {% endif %}
                         </ul>
                     </div>
@@ -97,8 +100,6 @@
             </div>
         </div>
     </div>
-
-
 
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src={% static "vendor/bootstrap/js/bootstrap.min.js" %}></script>
@@ -122,13 +123,21 @@
             background-color: #96D4D4;
         }
 
-        .table-name       { width : 25%; }
-        .table-genre      { width : 20%; }
-        .table-index      { width : 4%; }
-        .table-thumbnail  { width : 15%; }
-        .table-original   { width : 10%; }
-        .table-percentage { width : 5%; }
-        .table-discounted { width : 10%; }
+        .sale-info-table {
+            margin-left : -3%;
+            width : 107%;
+        }
+
+        .sale-table-head { text-align: center; }
         
+        /* 표 column 관련 스타일 */
+        .table-name        { width : 25%; }
+        .table-genre       { width : 25%; }
+        .table-index       { width : 4%;  text-align: center;}
+        .table-original    { width : 10%; text-align: right;}
+        .table-thumbnail   { width : 15%; }
+        .table-percentage  { width : 6%;  text-align: right;}
+        .table-discounted  { width : 10%; text-align: right;}
+        .table-seteam-page { width : 5%;  text-align: right;}
     </style>
 {% endblock %}

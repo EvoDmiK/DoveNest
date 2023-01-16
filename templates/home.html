@@ -99,7 +99,7 @@
             <div class="col-lg-4">
               <div class="top-downloaded">
                 <div class="heading-section">
-                  <h4><em>Steam</em>최고 판매량</h4>
+                  <h4><em>Steam</em>인기작</h4>
                 </div>
                 <ul>
                   {% for top_seller in top_sellers %}
@@ -110,7 +110,7 @@
                       <span><i class="fa fa-star" style="color: yellow;"></i> 4.9</span>
                       <span><i class="fa fa-download" style="color: #ec6090;"></i> 2.2M</span>
                       <div class="download">
-                        <a href="#"><i class="fa fa-sharp fa-solid fa-cart-shopping"></i></a>
+                        <a href={{ top_seller.steam_page }}><i class="fa fa-sharp fa-solid fa-cart-shopping"></i></a>
                       </div>
                     </li>
                   {% endfor %}

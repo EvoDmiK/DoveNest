@@ -49,10 +49,8 @@ def repair_keys(json_path):
         
         save_paths = [JSON_PATH, JSON_BACKUP_PATH]
         
-        print(save_paths)
         for save_path in save_paths:
             
-            print(save_path)
             os.makedirs(save_path, exist_ok = True)
             save_json(keys, f'{save_path}/keys.json')
         
@@ -86,6 +84,7 @@ class SteamAPI:
     URLS = {
         'sales'       : 'http://store.steampowered.com/api/featuredcategories/?l=koreana',
         'library'     : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
+        'steam_page'  : 'https://store.steampowered.com/app',
         'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
     }
 
@@ -208,6 +207,7 @@ class SteamAPI:
                         'name'       : name,
                         'genre'      : genre,
                         'discounted' : game['discounted'],
+                        'steam_page' : f'{SteamAPI.URLS["steam_page"]}/{appid}'
                     }
 
             if name not in top_names:
@@ -221,7 +221,7 @@ class SteamAPI:
 
 
 ## 할인 DB 관련 클래스 생성
-class salesDB:
+class SalesDB:
 
     def __init__(self, table_name, db_name):
 
@@ -265,7 +265,6 @@ class salesDB:
 
         col_keys = [col for col in col_indexes.keys()]
         try:
-            print(sorting_col, col_keys)
             assert sorting_col in col_keys, f'''\n[ERR.DB.Co-0001] 선택하신 조건에 맞는 컬럼이 존재하지 않아 선택 하신 옵션으로 정렬 할 수 없었습니다. \
                                                 {col_keys}에서 골라 주십시오.'''
 

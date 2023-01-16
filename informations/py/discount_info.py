@@ -127,7 +127,6 @@ def get_salelist():
     query = f"SELECT * FROM {TABLE_NAME}"
     cursor.execute(query)
 
-    print(cursor.fetchall())
     conn.commit()
     saleDB.backup_table()
 

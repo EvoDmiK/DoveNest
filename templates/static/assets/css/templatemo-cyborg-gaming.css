@@ -1096,7 +1096,7 @@ Featured Games Style
   margin-right: 10px;
 }
 
-.top-downloaded ul li .download i {
+/* .top-downloaded ul li .download i {
   position: absolute;
   right: 0;
   top: 50%;
@@ -1108,7 +1108,7 @@ Featured Games Style
   color: #ec6090;
   background-color: #27292a;
   border-radius: 50%;
-}
+} */
 
 .top-downloaded ul li {
   border-bottom: 1px solid #27292a;
