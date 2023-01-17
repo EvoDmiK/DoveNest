@@ -87,8 +87,9 @@ def save_db(idx, jsons):
             json_data = load_json(json_path)
             appid, name, gtype = json_data['steam_appid'], json_data['name'], json_data['type']
             DB.insert_table([appid, name, gtype, json.dumps(json_data)])
-            
+
         except Exception as e: print(f'[ERR.DB.I-0001] : [{now}] {e}\n')
+        time.sleep(7)
 
     now = datetime.now()
     print(f'[INFO] : [{now}] {idx} DB 저장 완료 ({time.time() - s:,.3f}s)')
@@ -113,8 +114,7 @@ start = time.time()
 procs = []
 
 
-
-
+# print(jobs[0])
 for idx, job in enumerate(jobs, 1):
     p = Process(target = save_db, args = (idx, job))
     p.start()

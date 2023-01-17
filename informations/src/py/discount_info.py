@@ -9,11 +9,12 @@ import os
 
 ROOT_PATH = f'/config/workspace/project/DoveNest/informations/'
 
-TABLE_NAME = 'saleinfo'
-DB_NAME    = 'game_informations'
+TABLE_NAME = 'discounts'
+DB_NAME    = 'sale_informations'
 
 os.makedirs(f'{ROOT_PATH}/db', exist_ok = True)
 
+## 할인정보 관련 DB
 class saleDB:
 
     ## DB와 연결시켜주는 함수
@@ -29,32 +30,34 @@ class saleDB:
     def create_table():
         
         cursor, conn = saleDB.connect_db()
-        query = f"""
-                    CREATE TABLE IF NOT EXISTS {TABLE_NAME}(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        query = f'''CREATE TABLE IF NOT EXISTS {TABLE_NAME}(
                     appid INTEGER NOT NULL,
+                    title TEXT NOT NULL,
                     percent INTEGER NOT NULL,
                     original INTEGER NOT NULL,
                     discounted INTEGER NOT NULL,
-                    platform TEXT NOT NULL, 
+                    platform TEXT NOT NULL,
                     date TEXT NOT NULL);
-                """
+                '''     
 
         cursor.execute(query)
         return cursor, conn
 
 
     ## 테이블에 데이터 입력해주는 함수
-    def insert_table(cursor, data_tuple):
+    def insert_table(table_name, data_tuple, conn, cursor):
         
-        appid, title, percent, origianl, discounted, date = data_tuple
-        query = f"""
-                    INSERT INTO {TABLE_NAME}
-                    (appid, percent, original, discounted, date)
-                    VALUES({appid}, {percent}, {original}, {discounted}, {today});
-                """
+        q, data_tuple = '', list(data_tuple)
+        json_data = load_json(f'{DATA_PATH}/{data_tuple[1]}/{data_tuple[1]}.json')    
+        data_tuple[0], data_tuple[1] = data_tuple[1], json_data['name']
 
-        cursor.execute(query)
+        for idx, data in enumerate(data_tuple, 1):
+            q += '?, ' if idx != len(data_tuple) else '?'
+        
+        query = f'INSERT INTO {table_name} VALUES ({q})'
+
+        cursor.execute(query, data_tuple)
+        conn.commit()
 
 
     ## 테이블 백업시켜주는 함수
@@ -105,7 +108,8 @@ def get_salelist():
     for idx, sale in enumerate(sales):
         try:
             appid      = sale['data-ds-appid']
-
+            name  = sale.select('span.title')[0].text
+            
             percent    = sale.select('.search_discount > span')[0].text
             percent    = int(percent.replace('-', '').replace('%', ''))
 
@@ -114,13 +118,7 @@ def get_salelist():
             
             today = f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
 
-            query = f"""
-            INSERT INTO {TABLE_NAME}
-            (appid, percent, original, discounted, platform, date)
-            VALUES({appid}, {percent}, {original}, {discounted}, 'steam', {today});
-            """
-            cursor.execute(query)
-
+            saleDB.insert_table(TABLE_NAME, (appid, name, percent, original, discounted, 'steam', today), conn, cursor)
 
         except Exception as e: print(f'[error] {e}')
 
@@ -131,8 +129,7 @@ def get_salelist():
     saleDB.backup_table()
 
 
-
-# ## 매일 오전 10시에 데이터 가져오는 함수 실행
+## 매일 오전 10시에 데이터 가져오는 함수 실행
 schedule.every().day.at("10:00").do(get_salelist)
 
 while True:

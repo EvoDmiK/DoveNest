@@ -1,3 +1,4 @@
+{% load static %}
 <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 
 <div class="container">
@@ -24,6 +25,96 @@
     <p>대한민국은 국제평화의 유지에 노력하고 침략적 전쟁을 부인한다. 국군의 조직과 편성은 법률로 정한다. 타인의 범죄행위로 인하여 생명·신체에 대한 피해를 받은 국민은 법률이 정하는 바에 의하여 국가로부터 구조를 받을 수 있다. 모든 국민은 법률이 정하는 바에 의하여 공무담임권을 가진다. 모든 국민은 소급입법에 의하여 참정권의 제한을 받거나 재산권을 박탈당하지 아니한다.</p>
   </div>
   <!-- 탭 메뉴 내용 끝 -->
+</div>
+
+<div class="sale-info">
+  
+  <form action="{% url 'exp:exp' %}" method = "post" class="sorting-form">
+    {% csrf_token %}
+    <div class="sorting-selector">
+        <select name="sorting_" id="sorting_">
+          <option value="">정렬 기준</option>
+          <option value="name">이 름</option>
+          <option value="percent">할인율</option>
+          <option value="discounted">할인가</option>
+        </select>
+    </div>
+  </form>
+
+  
+  </div>
+  <table class="sale-info-table">
+      <thead>
+          <tr class="sale-table-head">
+              <th>번호</th>
+              <th>이름</th>
+              <th>장르</th>
+              <th>원본 가격</th>
+              <th>할인율</th>
+              <th>할인 가격</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% if datas%}
+              {% for data in datas %}
+                  <tr>
+                      <!-- 페이지가 넘어가면 id가 21이 아닌, 0부터 시작되어 start index와 forloop을 더해줌. -->
+                      <td class = 'table-index'>{{ forloop.counter0|add:datas.start_index }}</td>
+                      <td class = 'table-name'>{{ data.name }}</td>
+                      <td class = 'table-genre'>{{ data.genre }}</td>
+                      <td class = 'table-original'>{{ data.original }}</td>
+                      <td class = 'table-percentage'>{{ data.percentage }}</td>
+                      <td class = 'table-discounted'>{{ data.discounted }}</td>     
+                  </tr>
+              {% endfor%}
+          {% else %}
+              오늘의 할인 정보가 없습니다.
+          {% endif%}
+      </tbody>
+  </table>
+
+  <!-- 페이징 해주는 부분 -->
+  <ul class="pagination justify-content-center">
+
+      <!-- 이전 페이지가 있는 경우에 -->
+      {% if datas.has_previous %}
+          <li class="page-item">
+              <a class="page-link" href="?page=1"> |<< </a>
+          </li>
+
+          <li class="page-item">
+              <a class="page-link" href="?page={{ datas.previous_page_number }}"> |< </a>
+          </li>
+      {% endif %}
+
+      <!-- 페이지 리스트 제작하는 부분 -->
+      {% for page_num in datas.paginator.page_range %}
+          {% if page_num >= datas.number|add:-3 and page_num <= datas.number|add:3 %}
+              <!-- 페이지 넘버와 현재 들어와 있는 페이지 번호가 동일한 경우 -->
+              {% if page_num == datas.number %}
+                  <li class="page-item active" aria-current="page">
+                      <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                  </li>
+              {% else %}
+                  <li class="page-item" aria-current="page">
+                      <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                  </li>
+              {% endif %}
+          {% endif%}
+      {% endfor %}
+      
+      <!-- 다음 페이지가 있는 경우에 -->
+      {% if datas.has_next %}
+          <li class="page-item">
+              <a class="page-link" href="?page={{ datas.next_page_number }}">>|</a>
+          </li>
+
+          <li class="page-item">
+              <a class="page-link" href="?page={{ last_page }}">>>| </a>
+          </li>
+
+      {% endif %}
+  </ul>
 </div>
 
 <style>
@@ -55,7 +146,33 @@
   .tab-content.current{
     display: inherit;
   }
-    
+
+  table, th, td, tr {
+      border          : 1px solid white;
+      border-collapse : collapse;
+  }
+
+  th, td {
+      background-color: #96D4D4;
+  }
+
+  .sale-info-table {
+      margin-left : -3%;
+      width : 80%;
+      margin-left: 5%;
+  }
+
+  .sale-table-head { text-align: center; }
+  
+  /* 표 column 관련 스타일 */
+  .table-name        { width : 15%; }
+  .table-genre       { width : 15%; }
+  .table-index       { width : 4%;  text-align: center;}
+  .table-original    { width : 10%; text-align: right;}
+  .table-thumbnail   { width : 10%; }
+  .table-percentage  { width : 6%;  text-align: right;}
+  .table-discounted  { width : 5%; text-align: right;}
+  .table-seteam-page { width : 5%;  text-align: right;}
 </style>
 
 <script>
@@ -85,5 +202,14 @@
       });
     });
 
+  });
+</script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("select[name=sorting_]").change(function(){
+      console.log("가", $("select[name=sorting_]").val());
+      $(".sorting-form").submit();
+    });
   });
 </script>
