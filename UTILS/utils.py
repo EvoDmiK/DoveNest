@@ -255,8 +255,8 @@ class SalesDB:
         reverse     = kwargs['desc']        if 'desc' in kwargs.keys() else False
 
         
-        col_indexes = {k : v for v, k in enumerate(['appid', 'name', 'percent', 'original', 
-                                                    'discounted', 'date'])}
+        col_indexes = {k : v for v, k in enumerate(['idx', 'appid', 'name', 'percent', 
+                                                    'original', 'discounted', 'date'])}
 
         ## 코드가 너무 킹받게 짜졌다..
         col_indexes = col_indexes if columns == '*' else \
@@ -265,7 +265,6 @@ class SalesDB:
 
         col_keys = [col for col in col_indexes.keys()]
 
-        print(col_keys)
         try:
             assert sorting_col in col_keys, f'''\n[ERR.DB.Co-0001] 선택하신 조건에 맞는 컬럼이 존재하지 않아 선택 하신 옵션으로 정렬 할 수 없었습니다. \
                                                 {col_keys}에서 골라 주십시오.'''

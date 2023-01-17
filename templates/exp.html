@@ -37,6 +37,7 @@
           <option value="name">이 름</option>
           <option value="percent">할인율</option>
           <option value="discounted">할인가</option>
+          <option value="idx">인기순</option>
         </select>
     </div>
   </form>
@@ -115,6 +116,7 @@
 
       {% endif %}
   </ul>
+  
 </div>
 
 <style>
@@ -207,9 +209,10 @@
 
 <script type="text/javascript">
   $(document).ready(function(){
+    $("select[name=sorting_]").val("{{ showing }}");
     $("select[name=sorting_]").change(function(){
-      console.log("가", $("select[name=sorting_]").val());
       $(".sorting-form").submit();
+      
     });
   });
 </script>
