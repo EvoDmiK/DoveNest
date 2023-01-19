@@ -7,7 +7,8 @@ import json
 import time
 import os
 
-ROOT_PATH = f'/config/workspace/project/DoveNest/informations/'
+ROOT_PATH = f'/config/workspace/project/DoveNest/informations'
+DATA_PATH  = f'{ROOT_PATH}/jsons'
 
 TABLE_NAME = 'discounts'
 DB_NAME    = 'sale_informations'
@@ -31,6 +32,7 @@ class saleDB:
         
         cursor, conn = saleDB.connect_db()
         query = f'''CREATE TABLE IF NOT EXISTS {TABLE_NAME}(
+                    idx   INTEGER NOT NULL,
                     appid INTEGER NOT NULL,
                     title TEXT NOT NULL,
                     percent INTEGER NOT NULL,
@@ -46,12 +48,11 @@ class saleDB:
 
     ## 테이블에 데이터 입력해주는 함수
     def insert_table(table_name, idx, data_tuple, conn, cursor):
-        
-        q, data_tuple = '', list(data_tuple)[1:]
-        
+
+        q, data_tuple = '', list(data_tuple)
+        appid = int(data_tuple[0])
+
         data_tuple.insert(0, idx)
-        json_data = load_json(f'{DATA_PATH}/{data_tuple[1]}/{data_tuple[1]}.json')    
-        data_tuple.insert(2, json_data['name'])
 
         for idx, data in enumerate(data_tuple, 1):
             q += '?, ' if idx != len(data_tuple) else '?'
@@ -124,15 +125,14 @@ def get_salelist():
 
         except Exception as e: print(f'[error] {e}')
 
-    query = f"SELECT * FROM {TABLE_NAME}"
-    cursor.execute(query)
-
     conn.commit()
     saleDB.backup_table()
 
 
-## 매일 오전 10시에 데이터 가져오는 함수 실행
-schedule.every().day.at("10:00").do(get_salelist)
+# get_salelist()
+
+# 매일 오전 10시에 데이터 가져오는 함수 실행
+schedule.every().day.at("09:10").do(get_salelist)
 
 while True:
 
