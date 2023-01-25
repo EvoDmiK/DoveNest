@@ -1,218 +1,38 @@
-{% load static %}
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<html lang="ko">
+<head>
+    <title>tfjs 사용해보기</title>
+    <h1>tensorflow.js 로딩되었다 히히</h1>
+</head>
 
-<div class="container">
-  <!-- 탭 메뉴 상단 시작 -->
-    <ul class="tabs">
-      <li class="tab-link current" id='steam' data-tab="tab-1">메뉴_하나</li>
-      <li class="tab-link" id='riot' data-tab="tab-2">메뉴_둘</li>
-      <li class="tab-link" id='etc' data-tab="tab-3">메뉴_셋</li>
-    </ul>
-  <!-- 탭 메뉴 상단 끝 -->
-  <!-- 탭 메뉴 내용 시작 -->
-  <div id="tab-1" class="tab-content current">
-    <h1>탭 메뉴 1 내용입니다.</h1>
-    <p>모든 국민은 법률이 정하는 바에 의하여 국방의 의무를 진다. 공공필요에 의한 재산권의 수용·사용 또는 제한 및 그에 대한 보상은 법률로써 하되, 정당한 보상을 지급하여야 한다. 법관은 탄핵 또는 금고 이상의 형의 선고에 의하지 아니하고는 파면되지 아니하며, 징계처분에 의하지 아니하고는 정직·감봉 기타 불리한 처분을 받지 아니한다. 대통령이 임시회의 집회를 요구할 때에는 기간과 집회요구의 이유를 명시하여야 한다. 대통령은 제1항과 제2항의 처분 또는 명령을 한 때에는 지체없이 국회에 보고하여 그 승인을 얻어야 한다. 대통령은 국무총리·국무위원·행정각부의 장 기타 법률이 정하는 공사의 직을 겸할 수 없다.</p>
-    <p>공무원은 국민전체에 대한 봉사자이며, 국민에 대하여 책임을 진다. 공개하지 아니한 회의내용의 공표에 관하여는 법률이 정하는 바에 의한다. 형사피의자 또는 형사피고인으로서 구금되었던 자가 법률이 정하는 불기소처분을 받거나 무죄판결을 받은 때에는 법률이 정하는 바에 의하여 국가에 정당한 보상을 청구할 수 있다. 헌법개정안은 국회가 의결한 후 30일 이내에 국민투표에 붙여 국회의원선거권자 과반수의 투표와 투표자 과반수의 찬성을 얻어야 한다. 헌법개정안이 제2항의 찬성을 얻은 때에는 헌법개정은 확정되며, 대통령은 즉시 이를 공포하여야 한다. 대통령은 국민의 보통·평등·직접·비밀선거에 의하여 선출한다.</p>
-  </div>
-  <div id="tab-2" class="tab-content">
-    <h1>  탭 메뉴 2 내용입니다.  </h1>
-    <p>근로자는 근로조건의 향상을 위하여 자주적인 단결권·단체교섭권 및 단체행동권을 가진다. 국가는 청원에 대하여 심사할 의무를 진다. 이 헌법공포 당시의 국회의원의 임기는 제1항에 의한 국회의 최초의 집회일 전일까지로 한다. 모든 국민은 직업선택의 자유를 가진다. 모든 국민은 언론·출판의 자유와 집회·결사의 자유를 가진다. 저작자·발명가·과학기술자와 예술가의 권리는 법률로써 보호한다. 대통령은 법률안의 일부에 대하여 또는 법률안을 수정하여 재의를 요구할 수 없다. 국회는 정부의 동의없이 정부가 제출한 지출예산 각항의 금액을 증가하거나 새 비목을 설치할 수 없다. 이 헌법시행 당시의 법령과 조약은 이 헌법에 위배되지 아니하는 한 그 효력을 지속한다.</p>
-    <p>정기회의 회기는 100일을, 임시회의 회기는 30일을 초과할 수 없다. 훈장등의 영전은 이를 받은 자에게만 효력이 있고, 어떠한 특권도 이에 따르지 아니한다. 모든 국민은 헌법과 법률이 정한 법관에 의하여 법률에 의한 재판을 받을 권리를 가진다. 모든 국민은 양심의 자유를 가진다. 법관은 탄핵 또는 금고 이상의 형의 선고에 의하지 아니하고는 파면되지 아니하며, 징계처분에 의하지 아니하고는 정직·감봉 기타 불리한 처분을 받지 아니한다. 이 헌법시행 당시에 이 헌법에 의하여 새로 설치될 기관의 권한에 속하는 직무를 행하고 있는 기관은 이 헌법에 의하여 새로운 기관이 설치될 때까지 존속하며 그 직무를 행한다.</p>
-  </div>
-  <div id="tab-3" class="tab-content">
-    <h1>  탭 메뉴 3 내용입니다.  </h1>
-    <p>대한민국은 국제평화의 유지에 노력하고 침략적 전쟁을 부인한다. 국군의 조직과 편성은 법률로 정한다. 타인의 범죄행위로 인하여 생명·신체에 대한 피해를 받은 국민은 법률이 정하는 바에 의하여 국가로부터 구조를 받을 수 있다. 모든 국민은 법률이 정하는 바에 의하여 공무담임권을 가진다. 모든 국민은 소급입법에 의하여 참정권의 제한을 받거나 재산권을 박탈당하지 아니한다.</p>
-  </div>
-  <!-- 탭 메뉴 내용 끝 -->
-</div>
+<body>
+    <img src="https://dove-nest.duckdns.org:331/templates/static/dataset/image/2.png" id="image" crossorigin="anonymous">
+    <img src="https://dove-nest.duckdns.org:331/templates/static/dataset/mask/2.png" id="mask" crossorigin="anonymous">
+</body>
 
-<div class="sale-info">
-  
-  <form action="{% url 'exp:exp' %}" method = "post" class="sorting-form">
-    {% csrf_token %}
-    <div class="sorting-selector">
-        <select name="sorting_" id="sorting_">
-          <option value="">정렬 기준</option>
-          <option value="name">이 름</option>
-          <option value="percent">할인율</option>
-          <option value="discounted">할인가</option>
-          <option value="idx">인기순</option>
-        </select>
-    </div>
-  </form>
-
-  
-  </div>
-  <table class="sale-info-table">
-      <thead>
-          <tr class="sale-table-head">
-              <th>번호</th>
-              <th>이름</th>
-              <th>장르</th>
-              <th>원본 가격</th>
-              <th>할인율</th>
-              <th>할인 가격</th>
-          </tr>
-      </thead>
-      <tbody>
-          {% if datas%}
-              {% for data in datas %}
-                  <tr>
-                      <!-- 페이지가 넘어가면 id가 21이 아닌, 0부터 시작되어 start index와 forloop을 더해줌. -->
-                      <td class = 'table-index'>{{ forloop.counter0|add:datas.start_index }}</td>
-                      <td class = 'table-name'>{{ data.name }}</td>
-                      <td class = 'table-genre'>{{ data.genre }}</td>
-                      <td class = 'table-original'>{{ data.original }}</td>
-                      <td class = 'table-percentage'>{{ data.percentage }}</td>
-                      <td class = 'table-discounted'>{{ data.discounted }}</td>     
-                  </tr>
-              {% endfor%}
-          {% else %}
-              오늘의 할인 정보가 없습니다.
-          {% endif%}
-      </tbody>
-  </table>
-
-  <!-- 페이징 해주는 부분 -->
-  <ul class="pagination justify-content-center">
-
-      <!-- 이전 페이지가 있는 경우에 -->
-      {% if datas.has_previous %}
-          <li class="page-item">
-              <a class="page-link" href="?page=1"> |<< </a>
-          </li>
-
-          <li class="page-item">
-              <a class="page-link" href="?page={{ datas.previous_page_number }}"> |< </a>
-          </li>
-      {% endif %}
-
-      <!-- 페이지 리스트 제작하는 부분 -->
-      {% for page_num in datas.paginator.page_range %}
-          {% if page_num >= datas.number|add:-3 and page_num <= datas.number|add:3 %}
-              <!-- 페이지 넘버와 현재 들어와 있는 페이지 번호가 동일한 경우 -->
-              {% if page_num == datas.number %}
-                  <li class="page-item active" aria-current="page">
-                      <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-                  </li>
-              {% else %}
-                  <li class="page-item" aria-current="page">
-                      <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-                  </li>
-              {% endif %}
-          {% endif%}
-      {% endfor %}
-      
-      <!-- 다음 페이지가 있는 경우에 -->
-      {% if datas.has_next %}
-          <li class="page-item">
-              <a class="page-link" href="?page={{ datas.next_page_number }}">>|</a>
-          </li>
-
-          <li class="page-item">
-              <a class="page-link" href="?page={{ last_page }}">>>| </a>
-          </li>
-
-      {% endif %}
-  </ul>
-  
-</div>
-
-<style>
-  ul.tabs{
-    margin: 0px;
-    padding: 0px;
-    list-style: none;
-  }
-
-  ul.tabs li{
-    display: inline-block;
-    background: #898989;
-    color: white;
-    padding: 10px 15px;
-    cursor: pointer;
-  }
-
-  ul.tabs li.current{
-    background: #e0e0e0;
-    color: #222;
-  }
-
-  .tab-content{
-    display: none;
-    background: #e0e0e0;
-    padding: 12px;
-  }
-
-  .tab-content.current{
-    display: inherit;
-  }
-
-  table, th, td, tr {
-      border          : 1px solid white;
-      border-collapse : collapse;
-  }
-
-  th, td {
-      background-color: #96D4D4;
-  }
-
-  .sale-info-table {
-      margin-left : -3%;
-      width : 80%;
-      margin-left: 5%;
-  }
-
-  .sale-table-head { text-align: center; }
-  
-  /* 표 column 관련 스타일 */
-  .table-name        { width : 15%; }
-  .table-genre       { width : 15%; }
-  .table-index       { width : 4%;  text-align: center;}
-  .table-original    { width : 10%; text-align: right;}
-  .table-thumbnail   { width : 10%; }
-  .table-percentage  { width : 6%;  text-align: right;}
-  .table-discounted  { width : 5%; text-align: right;}
-  .table-seteam-page { width : 5%;  text-align: right;}
-</style>
-
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
 <script>
-  $(document).ready(function(){
-	
-    $('ul.tabs li').click(function(){
-      var tab_id = $(this).attr('data-tab');
 
-      $('ul.tabs li').removeClass('current');
-      $('.tab-content').removeClass('current');
+    async function predict_func(image, mask){
+        const model = await tf.loadGraphModel('https://dove-nest.duckdns.org:331/templates/static/dataset/model.json');
+        model.executeAsync([mask, image]);
+    }
 
-      $(this).addClass('current');
-      $("#"+tab_id).addClass('current');
-      
-      console.log(this.id);
+    const image = document.getElementById('image');
+    const mask  = document.getElementById('mask');
 
-      $.ajax({
-          url     : "{% url 'profile:ajax_profile' %}",
-          type    : "POST", dataType : "json",
-          headers : {"X-CSRFToken" : "{{ csrf_token }}"},
-          data    : JSON.stringify({"id" : this.id}),
-          success : function(data){ 
-                      console.log("Django 민수야 고맙다"); 
-                      // document.all("most-played").innerHTML=data["most-played"];
-                    },
-          error   : function(request, error){ alert(request.status); }
-      });
-    });
+    let image_  = tf.browser.fromPixels(image);
+    let mask_   = tf.browser.fromPixels(mask).mean(2).toFloat().expandDims(-1);
 
-  });
-</script>
+    image_ = tf.image.resizeBilinear(image_, [256, 256]);
+    image_ = tf.reshape(image_, [3, 256, 256]);
+    image_ = tf.expandDims(image_, 0);
 
-<script type="text/javascript">
-  $(document).ready(function(){
-    $("select[name=sorting_]").val("{{ showing }}");
-    $("select[name=sorting_]").change(function(){
-      $(".sorting-form").submit();
-      
-    });
-  });
+    mask_ = tf.image.resizeBilinear(mask_, [256, 256]);
+    mask_ = tf.reshape(mask_, [1, 256, 256]);
+    mask_ = tf.expandDims(mask_, 0);
+
+    // 이거만 되면 될거같은데 왜 안되니,,
+    predict_func(image_, mask_)
+
+
 </script>

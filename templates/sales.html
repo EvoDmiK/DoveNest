@@ -18,83 +18,121 @@
             <div class="col-lg-12">
                 <div class="page-content" style="margin-top: 10%;">
                     <div class="sale-info">
-                        
-                        <table class="sale-info-table">
-                            <thead>
-                                <tr class="sale-table-head">
-                                    <th>번호</th>
-                                    <th>썸네일</th>
-                                    <th>이름</th>
-                                    <th>장르</th>
-                                    <th>원본 가격</th>
-                                    <th>할인율</th>
-                                    <th>할인 가격</th>
-                                    <th>링크</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if datas%}
-                                    {% for data in datas %}
-                                        <tr>
-                                            <!-- 페이지가 넘어가면 id가 21이 아닌, 0부터 시작되어 start index와 forloop을 더해줌. -->
-                                            <td class = 'table-index'>{{ forloop.counter0|add:datas.start_index }}</td>
-                                            <td class = 'table-thumbnail'><img src={{ data.image }}></td>
-                                            <td class = 'table-name'>{{ data.name }}</td>
-                                            <td class = 'table-genre'>{{ data.genre }}</td>
-                                            <td class = 'table-original'>{{ data.original }}</td>
-                                            <td class = 'table-percentage'>{{ data.percentage }}</td>
-                                            <td class = 'table-discounted'>{{ data.discounted }}</td>
-                                            <td class = 'table-seteam-page'><a href = {{ data.steam_page }}><img src={% static "custom/images/logos/steam.png" %}></a></td>                                
+                        <div class="container">
+                            <!-- 정렬 기준 지정하는 부분 -->
+                            <form action="{% url 'gamedb:saledb' %}" method="get" class="sorting-form">
+                                <div class="row">
+                                    <select name="sorting_" id="sorting_">
+                                      <option value="idx" selected>인기순</option>
+                                      <option value="name">이름</option>
+                                      <option value="percent">할인율</option>
+                                      <option value="discounted">할인가</option>  
+                                    </select>
+                                </div>
+                            </form>
+                            <!-- 정렬 기준 지정하는 부분 완성 -->
+
+                            <!-- 탭 메뉴 만들기 -->
+                            <!-- 탭 상단 메뉴 만드는 부분 -->
+                            <ul class="tabs">
+                                <li class="tab-link current" id="steam" data-tab="tab-1">Steam</li>
+                                <li class="tab-link" id="nintendo" data-tab="tab-2">Nintendo</li>
+                                <li class="tab-link" id="epicgames" data-tab="tab-3">Epicgames</li>
+                                <li class="tab-link" id="blizzard" data-tab="tab-4">Blizzard</li>
+                            </ul>
+                            <!-- 탭 상단 메뉴 완성 -->
+                            
+                            <!-- 탭 메뉴 컨텐츠 만드는 부분 -->
+                            <div id="tab-1" class="gaming-library profile-library tab-content current">
+                                <table class="sale-info-table">
+                                    <thead>
+                                        <tr class="sale-table-head">
+                                            <th>번호</th>
+                                            <th>썸네일</th>
+                                            <th>이름</th>
+                                            <th>장르</th>
+                                            <th>원본 가격</th>
+                                            <th>할인율</th>
+                                            <th>할인 가격</th>
+                                            <th>링크</th>
                                         </tr>
-                                    {% endfor%}
-                                {% else %}
-                                    오늘의 할인 정보가 없습니다.
-                                {% endif%}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                        {% if datas%}
+                                            {% for data in datas %}
+                                                <tr>
+                                                    <!-- 페이지가 넘어가면 id가 21이 아닌, 0부터 시작되어 start index와 forloop을 더해줌. -->
+                                                    <td class = 'table-index'>{{ forloop.counter0|add:datas.start_index }}</td>
+                                                    <td class = 'table-thumbnail'><img src={{ data.image }}></td>
+                                                    <td class = 'table-name'>{{ data.name }}</td>
+                                                    <td class = 'table-genre'>{{ data.genre }}</td>
+                                                    <td class = 'table-original'>{{ data.original }}</td>
+                                                    <td class = 'table-percentage'>{{ data.percentage }}</td>
+                                                    <td class = 'table-discounted'>{{ data.discounted }}</td>
+                                                    <td class = 'table-seteam-page'><a href = {{ data.steam_page }}><img src={% static "custom/images/logos/steam.png" %}></a></td>                                
+                                                </tr>
+                                            {% endfor%}
+                                        {% else %}
+                                            오늘의 할인 정보가 없습니다.
+                                        {% endif%}
+                                    </tbody>
+                                </table>
 
-                        <!-- 페이징 해주는 부분 -->
-                        <ul class="pagination justify-content-center">
+                                <!-- 페이징 해주는 부분 -->
+                                <ul class="pagination justify-content-center">
 
-                            <!-- 이전 페이지가 있는 경우에 -->
-                            {% if datas.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=1"> |<< </a>
-                                </li>
-
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ datas.previous_page_number }}"> |< </a>
-                                </li>
-                            {% endif %}
-
-                            <!-- 페이지 리스트 제작하는 부분 -->
-                            {% for page_num in datas.paginator.page_range %}
-                                {% if page_num >= datas.number|add:-3 and page_num <= datas.number|add:3 %}
-                                    <!-- 페이지 넘버와 현재 들어와 있는 페이지 번호가 동일한 경우 -->
-                                    {% if page_num == datas.number %}
-                                        <li class="page-item active" aria-current="page">
-                                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                    <!-- 이전 페이지가 있는 경우에 -->
+                                    {% if datas.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1"> |<< </a>
                                         </li>
-                                    {% else %}
-                                        <li class="page-item" aria-current="page">
-                                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ datas.previous_page_number }}"> |< </a>
                                         </li>
                                     {% endif %}
-                                {% endif%}
-                            {% endfor %}
-                            
-                            <!-- 다음 페이지가 있는 경우에 -->
-                            {% if datas.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ datas.next_page_number }}">>|</a>
-                                </li>
 
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ last_page }}">>>| </a>
-                                </li>
+                                    <!-- 페이지 리스트 제작하는 부분 -->
+                                    {% for page_num in datas.paginator.page_range %}
+                                        {% if page_num >= datas.number|add:-3 and page_num <= datas.number|add:3 %}
+                                            <!-- 페이지 넘버와 현재 들어와 있는 페이지 번호가 동일한 경우 -->
+                                            {% if page_num == datas.number %}
+                                                <li class="page-item active" aria-current="page">
+                                                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item" aria-current="page">
+                                                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endif%}
+                                    {% endfor %}
+                                    
+                                    <!-- 다음 페이지가 있는 경우에 -->
+                                    {% if datas.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ datas.next_page_number }}">>|</a>
+                                        </li>
 
-                            {% endif %}
-                        </ul>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ last_page }}">>>| </a>
+                                        </li>
+
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div id="tab-2" class = "gaming-library profile-library tab-content">
+                                <h1>아직 준비중입니다.</h1>
+                            </div>
+                            <div id="tab-3" class = "gaming-library profile-library tab-content">
+                                <h1>아직 준비중입니다.</h1>
+                            </div>
+                            <div id="tab-4" class = "gaming-library profile-library tab-content">
+                                <h1>아직 준비중입니다.</h1>
+                            </div>
+                            <!-- 탭 메뉴 컨텐츠 완성 -->
+                            <!-- 탭 메뉴 완성 -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,6 +152,15 @@
     <link href={% static "custom/css/custom.css" %} rel="stylesheet">
 
     <style>
+        :root {
+            --tab-color: #783ba3;
+        }
+
+        .darkmode{
+            --tab-color: #1f2122;
+        }
+
+        /* 표 관련 스타일 지정 */
         table, th, td, tr {
             border          : 1px solid white;
             border-collapse : collapse;
@@ -139,5 +186,68 @@
         .table-percentage  { width : 6%;  text-align: right;}
         .table-discounted  { width : 10%; text-align: right;}
         .table-seteam-page { width : 5%;  text-align: right;}
+        /* ----------------------------------------------------- */
+
+        /* 탭 메뉴 관련 스타일 지정 */
+        ul.tabs{
+            margin: 0px;
+            padding: 0px;
+            padding-top: 5%;
+            list-style: none;
+            border-radius: 23px;
+        }
+
+        ul.tabs li{
+            display: inline-block;
+            background: var(--tab-color);
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        ul.tabs li.current{
+            background: #e0e0e0;
+            color: #222;
+        }
+
+        .tab-content{
+            display: none;
+            background: var(--tab-color);
+            padding: 12px;
+        }
+
+        .tab-content.current{
+            display: inherit;
+        }
+        /* ----------------------------------------------------- */
+
     </style>
+
+    <!-- 정렬 기준 관련 스크립트 -->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("select[name=sorting_]").val("{{ showing }}");
+            $("select[name=sorting_]").change(function(){
+                $(".sorting-form").submit();
+            });
+        });
+    </script>
+
+    <!-- 탭 메뉴 관련 스크립트 -->
+    <script>
+        $(document).ready(function(){
+            $('ul.tabs li').click(function(){
+                var tab_id = $(this).attr('data-tab');
+
+                $('ul.tabs li').removeClass('current');
+                $('.tab-content').removeClass('current');
+
+                $(this).addClass('current');
+                $('#'+tab_id).addClass('current'); 
+
+                console.log(this, '#'+tab_id);
+
+            });
+        });
+    </script>
 {% endblock %}

@@ -5,7 +5,7 @@ from UTILS import utils
 from time import time
 
 DB         = utils.SalesDB(table_name = 'discounts', db_name = 'sale_informations')
-N_CONTENTS = 100
+N_CONTENTS = 200
 
 def gamedb(request):
     NOW  = datetime.now()
@@ -14,9 +14,17 @@ def gamedb(request):
     datas = []
     today =  f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
 
-    db_datas = DB.search_table(how_many = 100, conditions = ['date', today], sorting_col = 'name')
+    if request.method == 'GET': 
+        sorting_ = showing = request.GET.get('sorting_')
+        sorting_ = sorting_ if sorting_ != None else 'idx'
+        showing  = showing  if sorting_ != None else '인기순'
+
+
+    desc     = True if sorting_ in ['percent', 'name'] else False
+    db_datas = DB.search_table(how_many = N_CONTENTS, conditions = ['date', today], 
+                               desc = desc, sorting_col = sorting_)
     for db_data in db_datas:
-        appid, name, percent, original, discounted, platform, _ = db_data
+        _, appid, name, percent, original, discounted, platform, _ = db_data
         
         json_data = utils.SteamAPI.get_info(appid)
         genre = utils.SteamAPI.get_genre(appid, platform, datas = json_data)
@@ -36,8 +44,6 @@ def gamedb(request):
         except Exception as e:
                 print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
 
-
-
     ## 페이지 네이션 해주는 부분
     page = request.GET.get('page', '1')
 
@@ -47,7 +53,8 @@ def gamedb(request):
 
     context = {
                'datas'     : page_obj,
-               'last_page' : int(len(db_datas) // 20)
+               'last_page' : int(len(db_datas) // 20),
+               'showing'   : showing
             }
     return render(request, 'sales.html', context = context)
 

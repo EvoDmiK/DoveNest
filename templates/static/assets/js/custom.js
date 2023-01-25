@@ -4,7 +4,7 @@
 
 	// Page loading animation
 	$(window).on('load', function() {
-
+«
         $('#js-preloader').addClass('loaded');
 
     });
@@ -207,8 +207,9 @@
 	    $('.nav a').each(function () {
 	        var currLink = $(this);
 			console.log(currLink);
-			
+
 	        var refElement = $(currLink.attr("href"));
+			console.log(refElement)
 	        if (refElement.position().top <= scrollPos && refElement.position().top + refElement.height() > scrollPos) {
 	            $('.nav ul li a').removeClass("active");
 	            currLink.addClass("active");
