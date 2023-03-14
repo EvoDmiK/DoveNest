@@ -1,38 +1,11 @@
 <html lang="ko">
 <head>
-    <title>tfjs 사용해보기</title>
-    <h1>tensorflow.js 로딩되었다 히히</h1>
+    <title>크-린 봇 사용하기</title>ㅜ
+    <h1>크-린 봇을 써 보입시더</h1>
 </head>
 
 <body>
-    <img src="https://dove-nest.duckdns.org:331/templates/static/dataset/image/2.png" id="image" crossorigin="anonymous">
-    <img src="https://dove-nest.duckdns.org:331/templates/static/dataset/mask/2.png" id="mask" crossorigin="anonymous">
+
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
-<script>
-
-    async function predict_func(image, mask){
-        const model = await tf.loadGraphModel('https://dove-nest.duckdns.org:331/templates/static/dataset/model.json');
-        model.executeAsync([mask, image]);
-    }
-
-    const image = document.getElementById('image');
-    const mask  = document.getElementById('mask');
-
-    let image_  = tf.browser.fromPixels(image);
-    let mask_   = tf.browser.fromPixels(mask).mean(2).toFloat().expandDims(-1);
-
-    image_ = tf.image.resizeBilinear(image_, [256, 256]);
-    image_ = tf.reshape(image_, [3, 256, 256]);
-    image_ = tf.expandDims(image_, 0);
-
-    mask_ = tf.image.resizeBilinear(mask_, [256, 256]);
-    mask_ = tf.reshape(mask_, [1, 256, 256]);
-    mask_ = tf.expandDims(mask_, 0);
-
-    // 이거만 되면 될거같은데 왜 안되니,,
-    predict_func(image_, mask_)
-
-
-</script>

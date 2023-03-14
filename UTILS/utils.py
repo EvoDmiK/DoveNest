@@ -45,7 +45,7 @@ def repair_keys(json_path):
         print(f'[ERR.K.A-0001] json 파일이 깨져 열 수 없습니다. {e}')
         text = open(f'{JSON_BACKUP_PATH}/keys.txt', 'r').read().split('\n')
         keys = {platform : key 
-                for platform, key in zip(['youtube', 'steam'], text)}
+                for platform, key in zip(['youtube', 'steam', 'openai'], text)}
         
         save_paths = [JSON_PATH, JSON_BACKUP_PATH]
         
