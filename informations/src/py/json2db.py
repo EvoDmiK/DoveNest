@@ -96,10 +96,12 @@ def save_db(idx, jsons):
 
 
 json_paths = sorted(list_files(JSON_PATH))
-DB = _DB(DB_NAME, TABLE_NAME, [['appid', 'INTEGER', True], 
-                              ['name',  'TEXT', True], 
-                              ['type',  'TYPE', True],
-                              ['json_data', 'json', True]])
+DB = _DB(DB_NAME, TABLE_NAME, [
+                                  ['appid', 'INTEGER', True], 
+                                  ['name',  'TEXT', True], 
+                                  ['type',  'TYPE', True],
+                                  ['json_data', 'json', True]
+                               ])
 
 DB.create_table()
 print(f'[INFO] : [{datetime.now()}]테이블 <{TABLE_NAME}> 생성 완료')

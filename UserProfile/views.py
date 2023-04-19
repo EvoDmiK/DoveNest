@@ -5,7 +5,7 @@ from UTILS import utils
 import json
 
 KEY     = utils.get_key()
-USER_ID = 76561198804867273
+USER_ID = 76561198032052956
 
 def profile(request):
 
