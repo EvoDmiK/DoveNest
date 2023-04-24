@@ -13,8 +13,8 @@ experiment/
 
 
 ## 실행파일 보호
-**/*.sh
-*.sh
+informations/**/*.*
+**/**/*test*.*
 
 ## 로그파일 보호
 **/*.out
