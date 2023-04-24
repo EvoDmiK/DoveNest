@@ -4,9 +4,6 @@ ROOT_PATH=/config/workspace/project
 CONFIG_PATH=$ROOT_PATH/utils/config.json
 
 int_port=$(cat ${CONFIG_PATH} | jq '.dovenest_int_port')
-cert_path=$(cat ${CONFIG_PATH} | jq '.cert_path')
-privkey_path=$(cat ${CONFIG_PATH} | jq '.privkey_path')
-
 check=`ps -ef | grep ${int_port} | wc | awk '{print $1}'`
 
 if [ $check -gt 1 ]; then
@@ -49,6 +46,6 @@ else
     echo 이번에 생성할 로그 파일 경로 입니다. ${LOG_PATH}
 
     echo "\nssl 서버로 비둘기 둥지를 실행합니다."
-    nohup python manage.py runsslserver --certificate ${cert_path} \
-         0:${int_port} > $LOG_PATH &
+    nohup python manage.py runsslserver --certificate "/config/workspace/project/utils/keys/cert/fullchain1.pem" \
+         --key "/config/workspace/project/utils/keys/cert/privkey1.pem" 0:${int_port} > $LOG_PATH &
 fi
