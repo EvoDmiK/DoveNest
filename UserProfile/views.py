@@ -1,8 +1,10 @@
+from datetime import datetime
+import json
+
 from django.http import JsonResponse
 from django.shortcuts import render
-from datetime import datetime
-from UTILS import utils
-import json
+
+from utils import utils
 
 KEY     = utils.get_key()
 USER_ID = 76561198032052956

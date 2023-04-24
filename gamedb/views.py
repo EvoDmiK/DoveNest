@@ -1,8 +1,10 @@
+from datetime import datetime
+from time import time
+
 from django.core.paginator import Paginator
 from django.shortcuts import render
-from datetime import datetime
-from UTILS import utils
-from time import time
+
+from utils import utils
 
 DB         = utils.SalesDB(table_name = 'discounts', db_name = 'sale_informations')
 N_CONTENTS = 200

@@ -1,26 +1,32 @@
+from traceback import format_exc
 from collections import Counter
 from datetime import datetime
-import numpy as np
 import math as mt
-import traceback
-import requests
-import sqlite3
 import os, re
 import time
 import json
 
+import numpy as np
+import requests
+import sqlite3
+
+from utils import configs, logger
+
+LOGGER     = logger.get_logger()
+
 ## 모든 경로의 뿌리가 되는 경로
-ROOT_PATH  = '/config/workspace/project'
+ROOT_PATH  = configs.CONFIG
 
 ## 미리 API를 통해 받아둔 게임 정보 JSON파일 경로
-DATA_PATH  = f'{ROOT_PATH}/DoveNest/informations/jsons'
+DATA_PATH  = configs.DATA_PATH
 
 ## 게임 정보들을 모아둔 DB 경로
-DB_PATH     = f'{ROOT_PATH}/DoveNest/informations/db'
+DB_PATH     = configs.DB_PATH
 
 ## youtube, steam 등 API key를 저장하고 있는 경로
-JSON_PATH        = f'{ROOT_PATH}/utils/keys'
-JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/keys'
+JSON_PATH        = config.JSON_PATH
+JSON_BACKUP_PATH = config.JSON_BACKUP_PATH
+
 
 ## 유닉스 포맷의 시간 데이터를 파이썬의 datetime 포맷으로 변경시켜주는 함수
 unix2datetime = lambda unixtime: str(datetime.fromtimestamp(unixtime))
@@ -42,7 +48,7 @@ def repair_keys(json_path):
     ## json 파일이 깨졌을 경우에 백업폴더에 같이 저장되어 있는
     ## 텍스트 파일을 불러와서 복구 시켜주는 부분
     except Exception as e:
-        print(f'[ERR.K.A-0001] json 파일이 깨져 열 수 없습니다. {e}')
+        LOGGER.error(f'[ERR.K.A-0001] json 파일이 깨져 열 수 없습니다. {e} \n{format_exc()}')
         text = open(f'{JSON_BACKUP_PATH}/keys.txt', 'r').read().split('\n')
         keys = {platform : key 
                 for platform, key in zip(['youtube', 'steam', 'openai'], text)}
@@ -63,7 +69,7 @@ def get_key():
         key = repair_keys(JSON_PATH)['steam']
             
     else:
-        print(f'[WARN.K.A-0001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
+        LOGGER.warning('[WARN.K.A-0001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
         key = repair_keys(JSON_BACKUP_PATH)['steam']  
     
     return key
@@ -74,7 +80,7 @@ def get_key():
 def return_or_print(response):
     
     if response.status_code == 200: return response.json()
-    else: print(f'[ERR.R-001]no response data with code : {response.status_code}')
+    else: LOGGER.error(f'[ERR.R-001] no response data with code : {response.status_code}')
   
 
 ## steam API 관련 클래스 생성
@@ -100,7 +106,7 @@ class SteamAPI:
             return load_json(json_path)
         
         else:
-            print(f'[ERR.J-0001] <{appid}> json 파일이 존재하지 않습니다.')
+            LOGGER.error(f'[ERR.J-0001] <{appid}> json 파일이 존재하지 않습니다.')
             return {}
 
 
@@ -119,7 +125,7 @@ class SteamAPI:
                 user_datas.append(info)
                 
             except Exception as e:
-                print(traceback.format_exc(), e)
+                LOGGER.error(f'{format_exc()}')
                 
         return user_datas
 
@@ -149,7 +155,7 @@ class SteamAPI:
 
             except:
                 pass 
-                # print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다.')
+                # LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다.')
 
         return information
 
@@ -186,7 +192,7 @@ class SteamAPI:
     
         except Exception as e:
             genre     = f'{platform}에서 제공하지 않음.'
-            print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
+            LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다. \n{format_exc()}')
 
         return genre
 
@@ -215,7 +221,7 @@ class SteamAPI:
                 top_names.append(name)
 
             else:
-                print(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
+                LOGGER.warning(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
 
         return top_sellers, top_names
 
@@ -310,7 +316,7 @@ class SalesDB:
             col_index = col_indexes[sorting_col]
 
         except Exception as e:
-            print(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정바랍니다. {e}')
+            LOGGER.error(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
             query     = f'SELECT * FROM {self.table_name}'
             col_index = 0
 
