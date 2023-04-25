@@ -85,11 +85,11 @@ def save_db(idx, jsons):
         now = datetime.now()
         try:
             json_data = load_json(json_path)
-            appid, name, gtype = json_data['steam_appid'], json_data['name'], json_data['type']
-            DB.insert_table([appid, name, gtype, json.dumps(json_data)])
+            appid, name  = json_data['steam_appid'], json_data['name']
+            DB.insert_table([appid, name, json.dumps(json_data)])
 
         except Exception as e: print(f'[ERR.DB.I-0001] : [{now}] {e}\n')
-        time.sleep(7)
+        time.sleep(1)
 
     now = datetime.now()
     print(f'[INFO] : [{now}] {idx} DB 저장 완료 ({time.time() - s:,.3f}s)')
@@ -99,7 +99,6 @@ json_paths = sorted(list_files(JSON_PATH))
 DB = _DB(DB_NAME, TABLE_NAME, [
                                   ['appid', 'INTEGER', True], 
                                   ['name',  'TEXT', True], 
-                                  ['type',  'TYPE', True],
                                   ['json_data', 'json', True]
                                ])
 
