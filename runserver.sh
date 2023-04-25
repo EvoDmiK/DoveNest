@@ -46,6 +46,10 @@ else
     echo 이번에 생성할 로그 파일 경로 입니다. ${LOG_PATH}
 
     echo "\nssl 서버로 비둘기 둥지를 실행합니다."
-    nohup python manage.py runsslserver --certificate "/config/workspace/project/utils/keys/cert/fullchain1.pem" \
-         --key "/config/workspace/project/utils/keys/cert/privkey1.pem" 0:${int_port} > $LOG_PATH &
+
+    ## 일단 ssl 서버로는 접속이 안되서 그냥 서버로 접속시도,,
+    # nohup python manage.py runsslserver --certificate "/config/workspace/project/utils/keys/cert/fullchain1.pem" \
+    #      --key "/config/workspace/project/utils/keys/cert/privkey1.pem" 0:${int_port} > $LOG_PATH &
+
+    nohup python manage.py runserver 0:${int_port} > $LOG_PATH &
 fi
