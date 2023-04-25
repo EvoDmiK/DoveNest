@@ -2,12 +2,15 @@ from traceback import format_exc
 from collections import Counter
 from datetime import datetime
 import math as mt
-import os, re
 import time
 import json
+import os
+import re
 
+from bs4 import BeautifulSoup as bs
+from steam import Steam
+import requests as req
 import numpy as np
-import requests
 import sqlite3
 
 from utils import configs, logger
@@ -15,7 +18,7 @@ from utils import configs, logger
 LOGGER     = logger.get_logger()
 
 ## 모든 경로의 뿌리가 되는 경로
-ROOT_PATH  = configs.CONFIG
+ROOT_PATH  = configs.ROOT_PATH
 
 ## 미리 API를 통해 받아둔 게임 정보 JSON파일 경로
 DATA_PATH  = configs.DATA_PATH
@@ -24,8 +27,8 @@ DATA_PATH  = configs.DATA_PATH
 DB_PATH     = configs.DB_PATH
 
 ## youtube, steam 등 API key를 저장하고 있는 경로
-JSON_PATH        = config.JSON_PATH
-JSON_BACKUP_PATH = config.JSON_BACKUP_PATH
+JSON_PATH        = configs.JSON_PATH
+JSON_BACKUP_PATH = configs.JSON_BACKUP_PATH
 
 
 ## 유닉스 포맷의 시간 데이터를 파이썬의 datetime 포맷으로 변경시켜주는 함수
@@ -38,34 +41,41 @@ load_json     = lambda json_path: json.loads(open(json_path, 'r').read())
 save_json     = lambda data, json_path: json.dump(data, open(json_path, 'w'))
 
 ## api url을 입력하여 호출해주는 함수
-get_api       = lambda url: return_or_print(requests.get(url))
+get_api       = lambda url: return_or_print(req.get(url))
 
 
 ## key를 담고 있는 json 파일이 깨지거나 한 경우에 복구시켜 주는 함수
-def repair_keys(json_path):
-    try: keys = load_json(f'{json_path}/keys.json')
+def repair_keys(json_path: str) -> dict:
+    ## == 입력 값 ==
+    ## json_path : config 파일이 저장되어 있는 경로
+
+    ## == 출력 값 ==
+    ## config 파일에 저장되어 있는 세팅 값들.
+    
+    try: keys = load_json(f'{json_path}/config.json')
     
     ## json 파일이 깨졌을 경우에 백업폴더에 같이 저장되어 있는
     ## 텍스트 파일을 불러와서 복구 시켜주는 부분
     except Exception as e:
         LOGGER.error(f'[ERR.K.A-0001] json 파일이 깨져 열 수 없습니다. {e} \n{format_exc()}')
-        text = open(f'{JSON_BACKUP_PATH}/keys.txt', 'r').read().split('\n')
-        keys = {platform : key 
-                for platform, key in zip(['youtube', 'steam', 'openai'], text)}
+        texts = open(f'{JSON_BACKUP_PATH}/config.txt', 'r').read().split('\n')
+        names = configs.CONFIG_NAMES
+        keys  = {platform : key 
+                for platform, key in zip(names, texts)}
         
         save_paths = [JSON_PATH, JSON_BACKUP_PATH]
         
         for save_path in save_paths:
             
             os.makedirs(save_path, exist_ok = True)
-            save_json(keys, f'{save_path}/keys.json')
+            save_json(keys, f'{save_path}/config.json')
         
     finally: return keys
 
 
 ## steam API 키 가져오는 함수
-def get_key():
-    if os.path.isfile(f'{JSON_PATH}/keys.json'):
+def get_key() -> str:
+    if os.path.isfile(f'{JSON_PATH}/config.json'):
         key = repair_keys(JSON_PATH)['steam']
             
     else:
@@ -77,29 +87,58 @@ def get_key():
 
 ## api서버에 request 날렸을 때 정상적으로 돌아오면 데이터,
 ## 그 외의 경우에는 에러코드 남기는 함수
-def return_or_print(response):
+def return_or_print(response: requests.models.Response) -> dict:
     
+    ## == 입력 값 ==
+    ## response : API 서버에 요청해서 받은 반환 값
+
+    ## == 출력 값 ==
+    ## response 코드가 200인 경우만 웹으로 부터 전달 받은 response 값을 json 형태로 반환
+
     if response.status_code == 200: return response.json()
-    else: LOGGER.error(f'[ERR.R-001] no response data with code : {response.status_code}')
+    else: LOGGER.error(f'[ERR.R-0001] no response data with code : {response.status_code}')
   
 
 ## steam API 관련 클래스 생성
 class SteamAPI:
     
     ## api URL들을 저장해주는 딕셔너리
-    URLS = {
+    URLS  = {
         'sales'       : 'http://store.steampowered.com/api/featuredcategories/?l=koreana',
         'library'     : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
+        'steamspy'    : 'https://steamspy.com/',
         'steam_page'  : 'https://store.steampowered.com/app',
         'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
     }
+
+    STEAM = Steam(get_key())
+
+    ## 
+    def search_user(user_name: str) -> dict:
+
+        user_info = SteamAPI.STEAM.search_user(user_name)
+        if user_info == 'str': 
+            avatar = f'{ROOT_PATH}/DoveNest/templates/static/assets/images/avatar-01.jpg'
+            return {'steamid' : 'Not Matched', 'personalname' : None, 'avatar' : avatar}
+        else:
+            avatar       = user_info['player']['avatar']
+            steamid      = user_info['player']['steamid']
+            personalname = user_info['player']['personaname']
+
+            return {'steamid' : steamid, 'personalname' : personalname, 'avatar' : avatar}
 
 
     #! 게임 정보를 불러와 주는 api 함수 appid (상점에 있는 내용)을 기반으로 데이터를 불러옴.
     ## 원래 api를 호출하여 사용하려고 했으나, 한 번 호출하는데 0.3 ~ 0.6초 가량 걸리고,
     ## 하루 API 허가 호출량이 정해져있어 미리 api로 호출하여 저장해둔 json 데이터를 불러와 사용하는 것으로 변경
-    def get_info(appid):
+    def get_info(appid: str) -> dict:
         
+        ## == 입력 값 ==
+        ## appid : 게임의 고유 id
+
+        ## == 출력 값 ==
+        ## json 파일이 있을 경우에는 저장되어 있는 json 파일을 불러와 반환
+        ## json 파일이 없는 경우에는 어쩔 수 없이 API로 받아와서 반환 
         json_path = f'{DATA_PATH}/{appid}/{appid}.json'
 
         if os.path.isfile(json_path): 
@@ -111,8 +150,15 @@ class SteamAPI:
 
 
     ## api key와 steam user_id64를 입력받아서 해당 유저의 라이브러리 정보를 불러오는 함수
-    def get_user_library(key, user_id):
+    def get_user_library(key: str, user_id: str) -> list:
         
+        ## == 입력 값 ==
+        ## key     : 스팀 API키
+        ## user_id : 유저의 스팀 id 64
+
+        ## == 출력 값 ==
+        ## [게임 고유 id, 지금까지 플레이 한 시간, 마지막 플레이 시간]을 리스트로 묶어 반환
+         
         library_url = f'{SteamAPI.URLS["library"]}/?key={key}&steamid={user_id}&format=json'
         games = get_api(library_url)['response']['games']
         
@@ -131,8 +177,16 @@ class SteamAPI:
 
 
     ## 가장 많이 플레이한 게임 리스트 5개 반환해주는 함수
-    def most_played(library, platform = 'steam'):
+    def most_played(library: list, platform: str = 'steam') -> list:
+        
+        ## == 입력 값 ==
+        ## library  : 유저의 라이브러리 
+        ## platform : 게임 플랫폼 (steam, blizzard, riot, epic games, nintendo, ...)
 
+        ## == 출력 값 ==
+        ## 게임의 썸네일, 제목, 장르, 플레이 시간, 마지막 플레이 시간으로 
+        ## 구성된 딕셔너리 5개가 리스트 형태로 묶여 있는 반환 값
+          
         library = sorted(library, key = lambda x: x[1], reverse = True)[:5]
         information = []
 
@@ -161,8 +215,15 @@ class SteamAPI:
 
 
     ## 게임 관련 통계 만들어주는 함수
-    def get_stats(library, platform = 'steam'):
+    def get_stats(library: list , platform: str = 'steam') -> tuple:
         
+        ## == 입력 값 ==
+        ## library  : 유저의 라이브러리 
+        ## platform : 게임 플랫폼 (steam, blizzard, riot, epic games, nintendo, ...)
+
+        ## == 출력 값 ==
+        ## 게임의 장르, 개발사 별 개수와 현재 가지고 있는 게임의 개수를 묶어 반환
+
         genres, developers = [], []
         num_games = 0
 
@@ -180,25 +241,33 @@ class SteamAPI:
                 # print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
 
         genres, developers = Counter(genres), Counter(developers)
-        return genres, developers, num_games
+        return (genres, developers, num_games)
 
 
     ## 게임에서 장르 가져와주는 함수
-    def get_genre(appid, platform, datas = None):
+    def get_genre(appid: str, platform: str) -> str:
+
+        ## == 입력 값 ==
+        ## appid    : 게임의 고유 아이디
+        ## platform : 게임 플랫폼 (steam, blizzard, riot, epic games, nintendo, ...)
+
+        ## == 출력 값 ==
+        ## 게임의 장르가 여러 개인 경우 너무 길어져 3개 까지만 묶어 반환
+
         try:
-            if datas == None: datas     = SteamAPI.get_info(appid)
-            genre     = ', '.join([data['description'] for data in datas['genres']][:3])
+            datas = SteamAPI.get_info(appid)
+            genre = ', '.join([data['description'] for data in datas['genres']][:3])
 
     
         except Exception as e:
-            genre     = f'{platform}에서 제공하지 않음.'
+            genre  = f'{platform}에서 제공하지 않음.'
             LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다. \n{format_exc()}')
 
         return genre
 
 
-    ## 현재 스팀에서 가장 인기 있는 게임들
-    def get_trendy(sales, platform, top_sellers, top_names, nums):
+    ## 현재 스팀에서 가장 많이 팔리고 있는 게임들 
+    def get_topsellers(sales: dict, platform: str, top_sellers: list, top_names: list, nums: tuple) -> list:
         
         num1, num2 = nums
         for game in sales['top_sellers']['items'][num1 : num2]:
@@ -224,6 +293,71 @@ class SteamAPI:
                 LOGGER.warning(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
 
         return top_sellers, top_names
+
+
+    ## 현재 스팀에서 가장 인기 있는 게임들
+    def get_trendy(nums = 10):
+        
+        response = req.get(SteamAPI.URLS['steamspy'])
+        if response.status_code == 200:
+            
+            soup  = bs(response, 'html.parser')
+
+            ## steamspy에서 데이터 있는 테이블 스크래핑 
+            datas = list(soup.select('table.table-striped > tbody > tr > td'))
+
+            ## 500개 이후로는 데이터가 깨짐.
+            nums  = nums if nums < 500 else 500
+            
+            ## 필요없는 데이터 제거
+            datas = [data for data in datas if 'tplaytime' not in str(data)][:nums]
+
+            ## 한 게임에 대한 데이터가 총 6 라인으로 구성되어 있는데, 
+            ## 그 중 유의미한 데이터는 1번째 라인 ~ 5번째 라인까지여서 유의미한 데이터만 묶음.
+            datas = [datas[idx + 1 : idx + 5] for idx in range(0, len(datas), 6)]
+
+            for data in datas:
+
+                try:
+                    ## title : 게임 제목
+                    ## date  : 게임 출시일
+                    ## price : 게임 가격 (달러 단위)
+                    info, date, price, score = data
+
+                    title = title.text
+                    date  = date.text
+                    price = price.text
+
+                    ## appid     : 게임의 고유 아이디
+                    ## thumbnail : 게임 썸네일
+                    try: 
+                        appid     = info.select('a')[0]['href'].split('/')[2]
+                        thumbnail = info.select('a > img')[0]['src']
+
+                    except: 
+                        Logger.error('[ERR.D.H.0001] 지정해 주신 태그에서 원하시는 데이터를 찾을 수 없었습니다.')
+                        appid     = '000'
+                        thumbnail = f'{ROOT_PATH}/DoveNest/templates/static/assets/images/avatar-01.jpg'
+
+                    infos = {
+                                'title' : title, 'date'      : date, 'price' : price,
+                                'appid' : appid, 'thumbnail' : thumbnail
+                            }
+                    
+                except:
+                    Logger.error('[ERR.D.H.0001] 지정해 주신 태그에서 원하시는 데이터를 찾을 수 없었습니다.')
+                    appid     = '000'
+                    thumbnail = f'{ROOT_PATH}/DoveNest/templates/static/assets/images/avatar-01.jpg'
+
+                    infos = {
+                                'title' : None,  'date'      : None,     'price' : '$0.00',
+                                'appid' : appid, 'thumbnail' : thumbnail
+                            }
+
+        else:
+            LOGGER.error(f'[ERR.R-0001] no response data with code : {response.status_code}')
+
+        return infos
 
 
 ## 할인 DB 관련 클래스 생성
