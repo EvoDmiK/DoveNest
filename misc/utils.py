@@ -13,9 +13,10 @@ import requests as req
 import numpy as np
 import sqlite3
 
-from utils import configs, logger
+from misc import configs, logger
 
 LOGGER     = logger.get_logger()
+CONFIG     = configs.CONFIG
 
 ## 모든 경로의 뿌리가 되는 경로
 ROOT_PATH  = configs.ROOT_PATH
@@ -24,11 +25,7 @@ ROOT_PATH  = configs.ROOT_PATH
 DATA_PATH  = configs.DATA_PATH
 
 ## 게임 정보들을 모아둔 DB 경로
-DB_PATH     = configs.DB_PATH
-
-## youtube, steam 등 API key를 저장하고 있는 경로
-JSON_PATH        = configs.JSON_PATH
-JSON_BACKUP_PATH = configs.JSON_BACKUP_PATH
+DB_PATH    = configs.DB_PATH
 
 
 ## 유닉스 포맷의 시간 데이터를 파이썬의 datetime 포맷으로 변경시켜주는 함수
@@ -43,51 +40,9 @@ save_json     = lambda data, json_path: json.dump(data, open(json_path, 'w'))
 ## api url을 입력하여 호출해주는 함수
 get_api       = lambda url: return_or_print(req.get(url))
 
-
-## key를 담고 있는 json 파일이 깨지거나 한 경우에 복구시켜 주는 함수
-def repair_keys(json_path: str) -> dict:
-    ## == 입력 값 ==
-    ## json_path : config 파일이 저장되어 있는 경로
-
-    ## == 출력 값 ==
-    ## config 파일에 저장되어 있는 세팅 값들.
-    
-    try: keys = load_json(f'{json_path}/config.json')
-    
-    ## json 파일이 깨졌을 경우에 백업폴더에 같이 저장되어 있는
-    ## 텍스트 파일을 불러와서 복구 시켜주는 부분
-    except Exception as e:
-        LOGGER.error(f'[ERR.K.A-0001] json 파일이 깨져 열 수 없습니다. {e} \n{format_exc()}')
-        texts = open(f'{JSON_BACKUP_PATH}/config.txt', 'r').read().split('\n')
-        names = configs.CONFIG_NAMES
-        keys  = {platform : key 
-                for platform, key in zip(names, texts)}
-        
-        save_paths = [JSON_PATH, JSON_BACKUP_PATH]
-        
-        for save_path in save_paths:
-            
-            os.makedirs(save_path, exist_ok = True)
-            save_json(keys, f'{save_path}/config.json')
-        
-    finally: return keys
-
-
-## steam API 키 가져오는 함수
-def get_key() -> str:
-    if os.path.isfile(f'{JSON_PATH}/config.json'):
-        key = repair_keys(JSON_PATH)['steam']
-            
-    else:
-        LOGGER.warning('[WARN.K.A-0001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
-        key = repair_keys(JSON_BACKUP_PATH)['steam']  
-    
-    return key
-
-
 ## api서버에 request 날렸을 때 정상적으로 돌아오면 데이터,
 ## 그 외의 경우에는 에러코드 남기는 함수
-def return_or_print(response: requests.models.Response) -> dict:
+def return_or_print(response: req.models.Response) -> dict:
     
     ## == 입력 값 ==
     ## response : API 서버에 요청해서 받은 반환 값
@@ -102,16 +57,8 @@ def return_or_print(response: requests.models.Response) -> dict:
 ## steam API 관련 클래스 생성
 class SteamAPI:
     
-    ## api URL들을 저장해주는 딕셔너리
-    URLS  = {
-        'sales'       : 'http://store.steampowered.com/api/featuredcategories/?l=koreana',
-        'library'     : 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001',
-        'steamspy'    : 'https://steamspy.com/',
-        'steam_page'  : 'https://store.steampowered.com/app',
-        'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
-    }
-
-    STEAM = Steam(get_key())
+    STEAM = Steam(CONFIG.steam)
+    URLS  = configs.URLS
 
     ## 
     def search_user(user_name: str) -> dict:
