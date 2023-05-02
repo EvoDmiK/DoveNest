@@ -4,7 +4,7 @@ from time import time
 from django.core.paginator import Paginator
 from django.shortcuts import render
 
-from utils import utils
+from misc import utils
 
 DB         = utils.SalesDB(table_name = 'discounts', db_name = 'sale_informations')
 N_CONTENTS = 200
@@ -29,7 +29,7 @@ def gamedb(request):
         _, appid, name, percent, original, discounted, platform, _ = db_data
         
         json_data = utils.SteamAPI.get_info(appid)
-        genre = utils.SteamAPI.get_genre(appid, platform, datas = json_data)
+        genre = utils.SteamAPI.get_genre(appid, platform)
 
         try:
             info = {

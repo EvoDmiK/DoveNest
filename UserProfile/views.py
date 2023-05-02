@@ -4,9 +4,9 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from utils import utils
+from misc import utils, configs
 
-KEY     = utils.get_key()
+KEY     = configs.get_config().steam
 USER_ID = 76561198032052956
 
 def profile(request):

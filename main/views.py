@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.shortcuts import render
 
-from utils import utils
+from misc import utils
 # Create your views here.s
 
 ## 현재 스팀에서 가장 인기 있는 게임들
