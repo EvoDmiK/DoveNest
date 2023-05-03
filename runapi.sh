@@ -15,7 +15,7 @@ else
     LOG_PATH=${ROOT_PATH}/logs/DoveNest/API
 
     echo "실행 코드가 있는 곳으로 이동 \n"
-    cd ${ROOT_PATH}/DoveNest/api
+    cd ${ROOT_PATH}/DoveNest
     echo 현재 작업 디렉토리 입니다.
     pwd
 
@@ -47,5 +47,5 @@ else
     echo 이번에 생성할 로그 파일 경로 입니다. ${LOG_PATH}
 
     echo "\n비둘기 둥지 API를 실행합니다."
-    nohup uvicorn main:app --reload --host=0.0.0.0 --port=$int_port > $LOG_PATH &
+    nohup uvicorn api:app --reload --host=0.0.0.0 --port=$int_port > $LOG_PATH &
 fi
