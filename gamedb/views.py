@@ -31,6 +31,7 @@ def gamedb(request):
         json_data = utils.SteamAPI.get_info(appid)
         genre = utils.SteamAPI.get_genre(appid, platform)
 
+
         try:
             info = {
                     'image'      : json_data['header_image'],
@@ -44,7 +45,7 @@ def gamedb(request):
             datas.append(info)
         
         except Exception as e:
-                print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공 되지 않습니다. {e}')
+                print(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
 
     ## 페이지 네이션 해주는 부분
     page = request.GET.get('page', '1')

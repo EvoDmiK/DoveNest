@@ -13,9 +13,7 @@ import requests as req
 import numpy as np
 import sqlite3
 
-from misc import configs, logger
-
-LOGGER     = logger.get_logger()
+from misc import configs
 CONFIG     = configs.CONFIG
 
 ## 모든 경로의 뿌리가 되는 경로
@@ -51,7 +49,7 @@ def return_or_print(response: req.models.Response) -> dict:
     ## response 코드가 200인 경우만 웹으로 부터 전달 받은 response 값을 json 형태로 반환
 
     if response.status_code == 200: return response.json()
-    else: LOGGER.error(f'[ERR.R-0001] no response data with code : {response.status_code}')
+    else: print(f'[ERR.R-0001] no response data with code : {response.status_code}')
   
 
 ## steam API 관련 클래스 생성
@@ -92,7 +90,8 @@ class SteamAPI:
             return load_json(json_path)
         
         else:
-            LOGGER.error(f'[ERR.J-0001] <{appid}> json 파일이 존재하지 않습니다.')
+            print(f'[ERR.J-0001] <{appid}> json 파일이 존재하지 않습니다.')
+            
             return {}
 
 
@@ -118,7 +117,7 @@ class SteamAPI:
                 user_datas.append(info)
                 
             except Exception as e:
-                LOGGER.error(f'{format_exc()}')
+                print(f'{format_exc()}')
                 
         return user_datas
 
@@ -208,8 +207,7 @@ class SteamAPI:
     
         except Exception as e:
             genre  = f'{platform}에서 제공하지 않음.'
-            LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다. \n{format_exc()}')
-
+            print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다. \n')
         return genre
 
 
@@ -237,7 +235,7 @@ class SteamAPI:
                 top_names.append(name)
 
             else:
-                LOGGER.warning(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
+                print(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
 
         return top_sellers, top_names
 
@@ -282,7 +280,7 @@ class SteamAPI:
                         thumbnail = info.select('a > img')[0]['src']
 
                     except: 
-                        Logger.error('[ERR.D.H.0001] 지정해 주신 태그에서 원하시는 데이터를 찾을 수 없었습니다.')
+                        print('[ERR.D.H.0001] 지정해 주신 태그에서 원하시는 데이터를 찾을 수 없었습니다.')
                         appid     = '000'
                         thumbnail = f'{ROOT_PATH}/DoveNest/templates/static/assets/images/avatar-01.jpg'
 
@@ -292,7 +290,7 @@ class SteamAPI:
                             }
                     
                 except:
-                    Logger.error('[ERR.D.H.0001] 지정해 주신 태그에서 원하시는 데이터를 찾을 수 없었습니다.')
+                    print('[ERR.D.H.0001] 지정해 주신 태그에서 원하시는 데이터를 찾을 수 없었습니다.')
                     appid     = '000'
                     thumbnail = f'{ROOT_PATH}/DoveNest/templates/static/assets/images/avatar-01.jpg'
 
@@ -302,7 +300,7 @@ class SteamAPI:
                             }
 
         else:
-            LOGGER.error(f'[ERR.R-0001] no response data with code : {response.status_code}')
+            print(f'[ERR.R-0001] no response data with code : {response.status_code}')
 
         return infos
 
@@ -331,7 +329,6 @@ class SalesDB:
     def search_table(self, columns = '*', **kwargs):
 
         ## keyword argument 값에서 데이터가 없는 경우 기본값 지정
-
         ## 이부분도 너무 킹받게 짜졌다,, 안되는거 그냥 덕지덕지 수정했더니...
         sorting_col = kwargs['sorting_col'] if 'sorting_col' in kwargs.keys() else columns
         sorting_col = sorting_col if sorting_col != '*' else  \
@@ -397,7 +394,7 @@ class SalesDB:
             col_index = col_indexes[sorting_col]
 
         except Exception as e:
-            LOGGER.error(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
+            print(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
             query     = f'SELECT * FROM {self.table_name}'
             col_index = 0
 
