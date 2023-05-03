@@ -1,17 +1,24 @@
 from multiprocessing import Pool, Process
-import pandas as pd
-import requests
-import os, re
 import time
 import json
+import os
+import re
+
+from imutils.paths import list_files
+from tqdm import tqdm
+import pandas as pd
+import requests
+
+ROOT_PATH = '/config/workspace/project/DoveNest'
+SAVE_PATH = f'{ROOT_PATH}/informations/jsons'
+
+get_api  = lambda url: return_or_print(requests.get(url))
 
 def return_or_print(response):
     
     if response.status_code == 200: return response.json()
     else: print(f'no response data with code : {response.status_code}')
-
     
-get_api  = lambda url: return_or_print(requests.get(url))
 
 def get_info(appid):
     
@@ -46,41 +53,43 @@ def get_requirements(info, platform = 'pc', typeof = 'minimum'):
     return result
 
 
-steam_games = get_api('https://api.steampowered.com/ISteamApps/GetAppList/v2')['applist']['apps']
+steam_apps = get_api('https://api.steampowered.com/ISteamApps/GetAppList/v2')['applist']['apps']
 
-def save_json(idx, games):
-    database = {}
+jsons = list(list_files(SAVE_PATH))
+jsons = set([j.split(os.path.sep)[-2] for j in jsons])
+print(len(jsons))
 
-    for game in games:
-        appid     = game['appid']
+steam_apps = [app['appid'] for app in steam_apps if str(app['appid']) not in jsons]
+print(len(steam_apps))
+
+def save_json(idx, apps):
+
+    for app in tqdm(apps):
         
         try:
-            json_path = f'../jsons/{appid}' 
+            json_path = f'{SAVE_PATH}/{app}' 
             
             try:
-                info = get_info(appid)[str(appid)]['data']
+                info = get_info(app)[str(app)]['data']
                 
                 os.makedirs(json_path, exist_ok = True)
-                f = open(f'{json_path}/{appid}.json', 'w', encoding='utf-8')
+                f = open(f'{json_path}/{app}.json', 'w', encoding='utf-8')
                 json.dump(info, f, ensure_ascii=False,indent = 4)
             
             except Exception as e:
-                print(f'[Error. 001] json file can\'t save : [{appid}] {e}\n')
-                
-            database['appid']     = appid
-            database['json_path'] = f'{json_path}/{appid}.json'
+                print(f'[Error. 001] json file can\'t save : [{app}] {e}\n')
 
             time.sleep(7)
 
         except Exception as e:
-            print(f'[Error. 002] api data receieve failed : [{appid}] {e}\n')
+            print(f'[Error. 002] api data receieve failed : [{app}] {e}\n')
 
     print(f'[Done] process : {idx} done.\n')
 
-_1st_jobs = steam_games[:len(steam_games) // 4]
-_2nd_jobs = steam_games[len(steam_games) // 4 : len(steam_games) // 2]
-_3rd_jobs = steam_games[len(steam_games) // 2 : 3 * len(steam_games) // 4]
-_4th_jobs = steam_games[3 * len(steam_games) // 4 :]
+_1st_jobs = steam_apps[:len(steam_apps) // 4]
+_2nd_jobs = steam_apps[len(steam_apps) // 4 : len(steam_apps) // 2]
+_3rd_jobs = steam_apps[len(steam_apps) // 2 : 3 * len(steam_apps) // 4]
+_4th_jobs = steam_apps[3 * len(steam_apps) // 4 :]
 
 jobs = [_1st_jobs, _2nd_jobs, _3rd_jobs, _4th_jobs]
 start = time.time()
