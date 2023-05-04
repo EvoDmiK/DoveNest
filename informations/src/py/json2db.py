@@ -89,7 +89,7 @@ def save_db(idx, jsons):
             DB.insert_table([appid, name, json.dumps(json_data)])
 
         except Exception as e: print(f'[ERR.DB.I-0001] : [{now}] {e}\n')
-        time.sleep(1)
+        time.sleep(5)
 
     now = datetime.now()
     print(f'[INFO] : [{now}] {idx} DB 저장 완료 ({time.time() - s:,.3f}s)')

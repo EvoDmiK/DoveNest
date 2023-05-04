@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ROOT_PATH=/config/workspace/project
-CONFIG_PATH=$ROOT_PATH/utils/config.json
+CONFIG_PATH=$ROOT_PATH/utils/configs/ports.json
 
 int_port=$(cat ${CONFIG_PATH} | jq '.dovenest_api_int_port')
 

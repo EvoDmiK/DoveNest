@@ -129,7 +129,7 @@ def get_salelist():
     saleDB.backup_table()
 
 
-get_salelist()
+# get_salelist()
 
 # 매일 오전 9시 반에 데이터 가져오는 함수 실행
 schedule.every().day.at("09:30").do(get_salelist)

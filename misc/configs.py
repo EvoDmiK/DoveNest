@@ -9,7 +9,7 @@ from misc import logger
 ROOT_PATH        = '/config/workspace/project'
 DATA_PATH        = f'{ROOT_PATH}/DoveNest/informations/jsons'
 
-JSON_PATH        = f'{ROOT_PATH}/utils'
+JSON_PATH        = f'{ROOT_PATH}/utils/configs'
 JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/configs'
 
 DB_PATH          = f'{ROOT_PATH}/DoveNest/informations/db'
@@ -73,7 +73,18 @@ def get_config():
     return edict(config)
 
 
-CONFIG = get_config()
+def get_ports():
+
+    if os.path.isfile(f'{JSON_PATH}/ports.json'):
+        ports = repair_config(JSON_PATH)
+
+    else:
+        LOGGER.warning('[WARN.K.A-0001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
+        ports = repair_config(JSON_BACKUP_PATH)
+
+    return edict(ports)
+
+
 
 ## api URL들을 저장해주는 딕셔너리
 URLS  = {
@@ -84,4 +95,6 @@ URLS  = {
     'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
 }
 
+CONFIG = get_config()
+PORTS  = get_ports()
 URLS = edict(URLS)
