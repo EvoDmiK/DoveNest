@@ -25,7 +25,6 @@ DATA_PATH  = configs.DATA_PATH
 ## 게임 정보들을 모아둔 DB 경로
 DB_PATH    = configs.DB_PATH
 
-
 ## 유닉스 포맷의 시간 데이터를 파이썬의 datetime 포맷으로 변경시켜주는 함수
 unix2datetime = lambda unixtime: str(datetime.fromtimestamp(unixtime))
 
@@ -37,6 +36,7 @@ save_json     = lambda data, json_path: json.dump(data, open(json_path, 'w'))
 
 ## api url을 입력하여 호출해주는 함수
 get_api       = lambda url: return_or_print(req.get(url))
+
 
 ## api서버에 request 날렸을 때 정상적으로 돌아오면 데이터,
 ## 그 외의 경우에는 에러코드 남기는 함수
@@ -51,6 +51,48 @@ def return_or_print(response: req.models.Response) -> dict:
     if response.status_code == 200: return response.json()
     else: print(f'[ERR.R-0001] no response data with code : {response.status_code}')
   
+
+def get_sale_items(n_contents = 10, query = None):
+
+    NOW     = datetime.now()
+    Y, M, D = NOW.year, NOW.month, NOW.day
+
+    datas   = {}
+    today   = f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
+
+    sorting_ = query if query != None else 'idx'
+    desc     = True  if sorting_ in ['percent', 'name'] else False
+    db_datas = DB.search_table(
+                                how_many = n_contents, conditions  = ['date', today],
+                                desc     =       desc, sorting_col = sorting_
+                            )
+
+    for idx, db_data in enumerate(db_datas):
+
+        _, appid, name, percent, original, discounted, platform, _ = db_data
+
+        json_data = SteamAPI.get_info(appid)
+        genre     = SteamAPI.get_genre(appid, platform)
+
+        try:
+
+            data = {
+                        'image'       : json_data['header_image'],
+                        'name'        : json_data['name'],
+                        'genre'       : genre,
+                        'original'    : f'₩ {original:,}',
+                        'percentage'  : f'-{percent}%',
+                        'discounted'  : f'₩ {discounted:,}',
+                        'steam_page'  : f'{SteamAPI.URLS["steam_page"]}/{appid}'
+                    }
+
+            datas[idx] = data
+
+        except Exception as e:
+                print(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
+
+    return {"data" : datas}
+
 
 ## steam API 관련 클래스 생성
 class SteamAPI:
@@ -400,4 +442,7 @@ class SalesDB:
 
         ## how_many가 0을 포함한 음의 정수가 된다면 모든 데이터를 조회해준다.
         return sorted(self.cursor.fetchmany(how_many), 
-                      key = lambda x: x[col_index], reverse = reverse) 
+                      key = lambda x: x[col_index], reverse = reverse)
+
+
+DB = SalesDB(table_name = 'discounts', db_name = 'sale_informations')
