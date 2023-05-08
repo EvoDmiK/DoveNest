@@ -14,6 +14,7 @@ import numpy as np
 import sqlite3
 
 from misc import configs
+
 CONFIG     = configs.CONFIG
 
 ## 모든 경로의 뿌리가 되는 경로

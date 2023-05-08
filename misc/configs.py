@@ -13,16 +13,7 @@ JSON_PATH        = f'{ROOT_PATH}/utils/configs'
 JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/configs'
 
 DB_PATH          = f'{ROOT_PATH}/DoveNest/informations/db'
-CONFIG_NAMES     = [  'port',   'host',  'passwd', 'api_host',
-                    'youtube',  'steam', 'openai',
-                    'mrcon_api_int_port',
-                    'mrcon_api_ext_port',
-                    'chimhaha_int_port', 
-                    'chimwiki_int_port', 
-                    'dovenest_int_port', 
-                    'dovenest_api_int_port']
-
-LOGGER        = logger.get_logger()
+LOGGER           = logger.get_logger()
 
 ## json 파일을 불러와주는 함수
 load_json     = lambda json_path: json.loads(open(json_path, 'r').read())
@@ -38,7 +29,7 @@ def repair_json(json_path: str, ftype: str = 'config') -> dict:
     ## == 출력 값 ==
     ## config 파일에 저장되어 있는 세팅 값들.
     
-    try: config = load_json(f'{json_path}/{ftype}.json')
+    try: json_ = load_json(f'{json_path}/{ftype}.json')
     
     ## json 파일이 깨졌을 경우에 백업폴더에 같이 저장되어 있는
     ## 텍스트 파일을 불러와서 복구 시켜주는 부분
