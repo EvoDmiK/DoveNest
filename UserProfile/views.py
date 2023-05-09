@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 from misc import utils, configs
 
-KEY     = configs.get_config().steam
+KEY     = configs.CONFIG.steam
 USER_ID = 76561198032052956
 
 def profile(request):

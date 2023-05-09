@@ -15,6 +15,7 @@ import sqlite3
 
 from misc import configs
 
+LOGGER     = configs.LOGGER
 CONFIG     = configs.CONFIG
 
 ## 모든 경로의 뿌리가 되는 경로
@@ -50,7 +51,7 @@ def return_or_print(response: req.models.Response) -> dict:
     ## response 코드가 200인 경우만 웹으로 부터 전달 받은 response 값을 json 형태로 반환
 
     if response.status_code == 200: return response.json()
-    else: print(f'[ERR.R-0001] no response data with code : {response.status_code}')
+    else: LOGGER.error(f'[ERR.R-0001] no response data with code : {response.status_code}')
   
 
 def get_sale_items(n_contents = 10, query = None):
@@ -90,7 +91,7 @@ def get_sale_items(n_contents = 10, query = None):
             datas[idx] = data
 
         except Exception as e:
-                print(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
+                LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
 
     return {"data" : datas}
 
@@ -197,8 +198,8 @@ class SteamAPI:
                 information.append(info)
 
             except:
-                pass 
-                # LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다.')
+                # pass 
+                LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다.')
 
         return information
 
@@ -250,7 +251,7 @@ class SteamAPI:
     
         except Exception as e:
             genre  = f'{platform}에서 제공하지 않음.'
-            print(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다. \n')
+            LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 게임은 {platform}에서 제공되지 않습니다. \n')
         return genre
 
 
@@ -278,7 +279,7 @@ class SteamAPI:
                 top_names.append(name)
 
             else:
-                print(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
+                LOGGER.warning(f'[WARN.D-0001] 중복된 데이터 입니다. {name}')
 
         return top_sellers, top_names
 
@@ -343,7 +344,7 @@ class SteamAPI:
                             }
 
         else:
-            print(f'[ERR.R-0001] no response data with code : {response.status_code}')
+            LOGGER.error(f'[ERR.R-0001] no response data with code : {response.status_code}')
 
         return infos
 
@@ -437,7 +438,7 @@ class SalesDB:
             col_index = col_indexes[sorting_col]
 
         except Exception as e:
-            print(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
+            LOGGER.error(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
             query     = f'SELECT * FROM {self.table_name}'
             col_index = 0
 

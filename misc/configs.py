@@ -9,8 +9,8 @@ from misc import logger
 ROOT_PATH        = '/config/workspace/project'
 DATA_PATH        = f'{ROOT_PATH}/DoveNest/informations/jsons'
 
-JSON_PATH        = f'{ROOT_PATH}/utils/configs'
-JSON_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/configs'
+CONFIG_PATH        = f'{ROOT_PATH}/utils/configs'
+CONFIG_BACKUP_PATH = f'{ROOT_PATH}/BACKUPS/configs'
 
 DB_PATH          = f'{ROOT_PATH}/DoveNest/informations/db'
 LOGGER           = logger.get_logger()
@@ -40,7 +40,7 @@ def repair_json(json_path: str, ftype: str = 'config') -> dict:
         texts  = [text.split() for text in texts]
         json_  = {name : text  for name, text in texts}
         
-        save_paths = [JSON_PATH, JSON_BACKUP_PATH]
+        save_paths = [CONFIG_PATH, CONFIG_BACKUP_PATH]
         
         for save_path in save_paths:
             
@@ -51,28 +51,35 @@ def repair_json(json_path: str, ftype: str = 'config') -> dict:
 
 
 ## steam API 키 가져오는 함수
-def get_config():
+def repair_json(json_path, ftype = 'config'):
 
-    if os.path.isfile(f'{JSON_PATH}/config.json'):
-        config = repair_json(JSON_PATH)
+    try: json_ = load_json(f'{json_path}/{ftype}.json')
+    except Exception as e:
+
+        LOGGER.error(f'[ERR.K.A-0001] json 파일이 깨져 열 수 없습니다. {e} \n{format_exc()}')
+        texts = open(f'{JSON_BACKUP_PATH}/{ftype}.txt', 'r').readlines()
+        texts = [text.split() for text in texts]
+        json_ = {name : text for name, text in texts}
+
+        save_paths = [CONFIG_PATH, CONFIG_BACKUP_PATH]
+        for save_path in save_paths:
+
+            os.makedirs(save_path, exist_ok = True)
+            save_json(json_, f'{save_path}/{ftype}.json')
+
+    finally: return json_
+
+
+def get_json(ftype = 'config'):
+
+    if os.path.isfile(f'{CONFIG_PATH}/{ftype}.json'):
+        config = repair_json(CONFIG_PATH, ftype = ftype)
 
     else:
         LOGGER.warning('[WARN.K.A-0001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
-        config = repair_json(JSON_BACKUP_PATH)
+        config = repair_json(CONFIG_BACKUP_PATH, ftype = ftype)
 
     return edict(config)
-
-
-def get_ports():
-
-    if os.path.isfile(f'{JSON_PATH}/ports.json'):
-        ports = repair_json(JSON_PATH, ftype = 'ports')
-
-    else:
-        LOGGER.warning('[WARN.K.A-0001] json 파일이 존재하지 않아 백업 데이터를 로딩합니다.')
-        ports = repair_json(JSON_BACKUP_PATH, ftype = 'ports')
-
-    return edict(ports)
 
 
 ## api URL들을 저장해주는 딕셔너리
@@ -84,6 +91,6 @@ URLS  = {
     'get_summary' : 'https://partner.steam-api.com/ISteamUser/GetPlayerSummaries/v2/',
 }
 
-CONFIG = get_config()
-PORTS  = get_ports()
+CONFIG = get_json()
+PORTS  = get_json(ftype='ports')
 URLS   = edict(URLS)
