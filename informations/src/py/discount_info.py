@@ -1,140 +1,205 @@
-from bs4 import BeautifulSoup as bs
+## 필요한 패키지들 로드
+## 1. 내장 모듈
+from traceback import format_exc
 from datetime import datetime
-import requests as req
-import schedule
-import sqlite3
 import json
 import time
 import os
+import re
 
-ROOT_PATH = f'/config/workspace/project/DoveNest/informations'
-DATA_PATH  = f'{ROOT_PATH}/jsons'
+## 2. 써드 파티 패키지
+from easydict import EasyDict as edict
+from bs4 import BeautifulSoup as bs
+import requests as req
+import pymysql as sql
+import schedule
+import redis
 
-TABLE_NAME = 'discounts'
-DB_NAME    = 'sale_informations'
+## 3. 직접 구현한 모듈
+from misc import configs
 
-os.makedirs(f'{ROOT_PATH}/db', exist_ok = True)
+## 전역 변수 지정
+ITEMS_TAG = configs.ITEMS_TAG
+CONFIGS   = configs.CONFIGS
+LOGGER    = configs.LOGGER
+PORTS     = configs.PORTS
+URLS      = configs.URLS
 
-## 할인정보 관련 DB
-class saleDB:
 
-    ## DB와 연결시켜주는 함수
-    def connect_db():
+PASSWD    = CONFIGS.sql_passwd
+SPORT     = PORTS.sql_port
+RPORT     = PORTS.redis_port
+HOST      = CONFIGS.global_host
+USER      = CONFIGS.sql_user
 
-        dbpath = f'{ROOT_PATH}/db/{DB_NAME}.db'
-        conn   = sqlite3.connect(dbpath)
-        cursor = conn.cursor()
+NOW       = datetime.now()
+Y, M, D   = NOW.year, NOW.month, NOW.day
 
-        return cursor, conn
+today     = f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
 
-    ## 테이블 만들어주는 함수
-    def create_table():
+## CONFIG 파일을 이용하여 Redis 서버에 연결
+## decode_responses = True를 이용하면 key 값을 get 했을때 binary가 아닌 string으로 반환
+rconn     = redis.Redis(host = HOST, port = RPORT,
+                        decode_responses = True, db = 1)
+
+## 할인 정보를 담고 있는 DB 클래스
+class SaleDB:
+
+    def __init__(self, host, user, passwd, port, db):
         
-        cursor, conn = saleDB.connect_db()
-        query = f'''CREATE TABLE IF NOT EXISTS {TABLE_NAME}(
-                    idx   INTEGER NOT NULL,
-                    appid INTEGER NOT NULL,
-                    title TEXT NOT NULL,
-                    percent INTEGER NOT NULL,
-                    original INTEGER NOT NULL,
-                    discounted INTEGER NOT NULL,
-                    platform TEXT NOT NULL,
-                    date TEXT NOT NULL);
-                '''     
+        ## MariaDB 서버에서 DoveNest DB에 연결
+        self.conn    = sql.connect(host = host, port = port, user = user,
+                                   passwd = passwd, db = db)
 
-        cursor.execute(query)
-        return cursor, conn
-
-
-    ## 테이블에 데이터 입력해주는 함수
-    def insert_table(table_name, idx, data_tuple, conn, cursor):
-
-        q, data_tuple = '', list(data_tuple)
-        appid = int(data_tuple[0])
-
-        data_tuple.insert(0, idx)
-
-        for idx, data in enumerate(data_tuple, 1):
-            q += '?, ' if idx != len(data_tuple) else '?'
-        
-        query = f'INSERT INTO {table_name} VALUES ({q})'
-
-        cursor.execute(query, data_tuple)
-        conn.commit()
-
-
-    ## 테이블 백업시켜주는 함수
-    def backup_table():
-        
-        _, conn = saleDB.connect_db()
-        with conn:
-            with open(f'{ROOT_PATH}/db/{DB_NAME}.sql', 'w') as f:
-                for line in conn.iterdump():
-                    f.write('%s\n' % line)
-
-                print('[INFO] DB backup complete!')
-
-
-## 스팀 세일 페이지에서 데이터 스크래핑 해서 가져오는 함수
-def discount_scraping():
-    whole_page = ""
-
-    ## 총 5페이지 긁어옴.
-    for idx in range(1, 10):
-        url = f'https://store.steampowered.com/search/?specials=1&filter=topsellers&page={idx}'
-        res = req.get(url)
-        whole_page += res.text
-
-    soup       = bs(whole_page, 'html.parser')
-    sales      = soup.select('div#search_resultsRows > a') 
-
-    return sales
-
-
-## 원래 가격, 할인된 가격에서 필요없는 부분 전처리 해주는 함수
-def preprop(string, dtype = 'discount'): 
+        self.cursor = self.conn.cursor()
     
-    if dtype == 'discount': string = string.replace(' ', '').split('₩')[-1]
-    string = string.replace(',', '').replace('₩', '')
+
+    ## 테이블 생성함수
+    def create_table(self):
+        
+        LOGGER.info(f'[INFO] 테이블을 생성 중 입니다. 잠시만 기다려 주세요.')
+        query = f'''
+                    CREATE TABLE IF NOT EXISTS discount_info(
+                        idx        INTEGER NOT NULL,
+                        appid      TEXT    NOT NULL,
+                        title      TEXT    NOT NULL,
+                        percent    INTEGER NOT NULL,
+                        discounted TEXT    NOT NULL,
+                        original   TEXT    NOT NULL,
+                        platform   TEXT    NOT NULL,
+                        storepage  TEXT,
+                        thumbnail  TEXT,
+                        date       TEXT NOT NULL
+                    );
+                '''
+
+        self.cursor.execute(query)
+        LOGGER.info('[INFO] 테이블 생성이 완료 되었습니다.\n')
+
+
+    ## 데이터 입력 함수
+    def insert_table(self, data_tuple):
+
+        query = '''
+                    INSERT INTO discount_info (idx, appid, title, percent,
+                    discounted, original, platform, storepage, thumbnail, date)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                '''
+
+        self.cursor.execute(query, data_tuple)
+
+
+    ## 테이블에 오늘 저장된 데이터 개수를 반환해주는 함수
+    def __len__(self):
+
+        return self.cursor.execute(f'select * from discount_info where date={today}')
+
+
+## 할인 정보 페이지를 스크래핑 하는 함수
+def scrapping(platform = 'steam'):
+
+    LOGGER.info(f'[INFO] 현재 {platform} 할인 정보 페이지를 스크래핑 중입니다. 잠시만 기다려 주세요.')
+    url = URLS[platform]
+
+    ## 파라미터 값이 steam인 경우에는 10페이지까지 데이터를 삭 긁어옴.
+    if platform == 'steam':
+
+        res = ''
+        for idx in range(1, 10):
+
+            url_  = f'{url}{idx}'
+            res += req.get(url_).text
+
+
+    ## nintendo인 경우에는 그냥 데이터를 삭 긁어옴.
+    elif platform == 'nintendo':
+        res = req.get(url).text
+
+    soup = bs(res, 'html.parser')
+
+    LOGGER.info(f'[INFO] {platform} 할인 정보 페이지 스크래핑을 완료했습니다.\n')
+
+    ## 각 platform별 할인정보를 담고 있는 태그 파싱
+    return soup.select(ITEMS_TAG[platform])
     
-    return int(string)
 
+## 파싱된 데이터에서 필요한 데이터만 뽑아서 DB에 입력하는 함수
+def mining(platform = 'steam'):
 
-## 스크래핑 된 데이터에서 필요한 정보만 긁어오는 함수
-def get_salelist(): 
-    NOW     = datetime.now()
-    Y, M, D = NOW.year, NOW.month, NOW.day
+    items      = scrapping(platform)
+    clear      = lambda x: int(re.sub('[^0-9]*', '', x))
+    length     = len(DB)
 
-    cursor, conn = saleDB.create_table()
-    sales        = discount_scraping()
-
-    for idx, sale in enumerate(sales):
+    LOGGER.info(f'[INFO] 현재 스크래핑 한 데이터에서 필요한 정보를 DB에 입력 중 입니다.')
+    LOGGER.info(f'[INFO] 현재 테이블에 저장된 데이터 개수는 {length}개 입니다.\n')
+    for idx, item in enumerate(items, 1):
+        '''
+            DB에 저장할 데이터는
+            idx        | 데이터의 인덱스 값
+            appid      | 할인 품목의 고유 아이디
+            title      | 할인 품목의 이름
+            percent    | 할인율
+            discount   | 할인가
+            original   | 원가
+            platform   | 할인 플랫폼
+            store_page | 할인 물품의 상점 페이지
+            thumbnail  | 할인 품목의 이미지
+            date       | 오늘 날짜
+        '''
         try:
-            appid      = sale['data-ds-appid']
-            name  = sale.select('span.title')[0].text
-            
-            percent    = sale.select('.search_discount > span')[0].text
-            percent    = int(percent.replace('-', '').replace('%', ''))
+            if platform == 'steam':
 
-            original   = preprop(sale.select('strike')[0].text)
-            discounted = preprop(sale.select(".discounted")[0].text, dtype="discount")
-            
-            today = f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
+                appid      = item['data-ds-appid']
+                title      = item.select('span.title')[0].text
+                store_page = f'https://store.steampowered.com/app/{appid}'
+                
+                ## 스크래핑 해 본 결과 이미지가 없어서 redis에 저장되어 있는 데이터로 사용
+                json_      = json.loads(rconn.get(f'id:{appid}'))
+                thumbnail  = json_['data']['header_image']
 
-            saleDB.insert_table(TABLE_NAME, idx, (appid, name, percent, original, discounted, 'steam', today), conn, cursor)
+                percent     = item.select('.search_discount > span')[0].text
+                percent     = clear(percent)
 
-        except Exception as e: print(f'[error] {e}')
+                original    = item.select('strike')[0].text.strip()
+                discount    = item.select('.discounted')[0].text.split('₩')[-1]
+                discount    = f'₩{discount}'
 
-    conn.commit()
-    saleDB.backup_table()
+            elif platform == 'nintendo':
+                
+                title_link = item.select('a.category-product-item-title-link')
+                store_page = title_link[0]['href']
+                thumbnail  = item.select('span > img')[0]['data-src']
+                original   = item.select('span > span.price')[1].text
+                discount   = item.select('span > span.price')[0].text
+
+                ## nintendo 할인 페이지에는 할인율을 제공하지 않아 직접 계산 
+                percent    = 100 - round(clear(discount) * 100 / clear(original))
+                title      = title_link[0].text.strip()
+
+                # LOGGER.info(store_page)
+                appid      = store_page.split('.kr/')[1]
+
+            data_tuple = [idx + length, appid, title, percent, discount,
+                         original, platform, store_page, thumbnail, today]
+
+            DB.insert_table(data_tuple)
+
+        except: LOGGER.error(format_exc())
+
+    LOGGER.info(f'[INFO] DB에 모든 데이터 입력을 완료 했습니다.')
+    LOGGER.info(f'[INFO] 현재 테이블에 저장된 데이터 개수는 {len(DB)}개 입니다.\n')
+    DB.conn.commit()
 
 
-# get_salelist()
+DB = SaleDB(HOST, USER, PASSWD, SPORT, 'DoveNest')
+DB.create_table()
 
 # 매일 오전 9시 반에 데이터 가져오는 함수 실행
-schedule.every().day.at("09:30").do(get_salelist)
+schedule.every().day.at("09:30").do(mining, 'steam')
+schedule.every().day.at("09:30").do(mining, 'nintendo')
 
 while True:
 
     schedule.run_pending()
     time.sleep(1)
+
