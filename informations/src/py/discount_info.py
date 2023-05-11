@@ -47,12 +47,13 @@ class SaleDB:
 
     def __init__(self, host, user, passwd, port, db):
         
+        LOGGER.info(f'[INFO] DB서버에 연결 중 입니다. 잠시만 기다려 주세요.')
         ## MariaDB 서버에서 DoveNest DB에 연결
         self.conn    = sql.connect(host = host, port = port, user = user,
                                    passwd = passwd, db = db)
 
         self.cursor = self.conn.cursor()
-    
+        LOGGER.info(f'[INFO] DB서버에 연결 되었습니다.')
 
     ## 테이블 생성함수
     def create_table(self):
@@ -125,6 +126,9 @@ def scrapping(platform = 'steam'):
 
 ## 파싱된 데이터에서 필요한 데이터만 뽑아서 DB에 입력하는 함수
 def mining(platform = 'steam'):
+    DB = SaleDB(HOST, USER, PASSWD, SPORT, 'DoveNest')
+
+    if platform == 'steam': DB.create_table()
 
     items      = scrapping(platform)
     clear      = lambda x: int(re.sub('[^0-9]*', '', x))
@@ -189,17 +193,15 @@ def mining(platform = 'steam'):
     LOGGER.info(f'[INFO] DB에 모든 데이터 입력을 완료 했습니다.')
     LOGGER.info(f'[INFO] 현재 테이블에 저장된 데이터 개수는 {len(DB)}개 입니다.\n')
     DB.conn.commit()
+    DB.conn.close()
 
 
-DB = SaleDB(HOST, USER, PASSWD, SPORT, 'DoveNest')
-DB.create_table()
+## 매일 오전 10시 반에 데이터 가져오는 함수 실행
+schedule.every().day.at("10:30").do(mining, 'steam')
+schedule.every().day.at("10:30").do(mining, 'nintendo')
 
-# 매일 오전 9시 반에 데이터 가져오는 함수 실행
-schedule.every().day.at("09:30").do(mining, 'steam')
-schedule.every().day.at("09:30").do(mining, 'nintendo')
 
 while True:
 
     schedule.run_pending()
     time.sleep(1)
-
