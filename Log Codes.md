@@ -19,14 +19,16 @@
 |K| Key 관련 코드|
 |Q| 쿼리 관련 코드|
 |R| HTTP 상태 관련 코드|
+|Red| Redis 관련 코드 |
 
 - e.g.)
 - <span style="color: red">[ERR.K.A]</span> -> API 키 관련 에러
--  <span style="color: yellow">[WARN.K.Dic]</span> -> 딕셔너리 키 
+- <span style="color: yellow">[WARN.K.Dic]</span> -> 딕셔너리 키 관련 경고
+- <span style="color: blue">[INFO.DB.Red]</span> -> Redis DB 관련 정보 
 
 
-# 관련 경고
-## 1. JSON 관련 로그
+# 1. 관련 로그
+## 1-1. JSON 관련 로그
 ---
 - <span style="color: red">[ERR.J-0001] : 불러오고자 하는 JSON 파일이 경로상에 존재하지 않음.</span>
     - [로그 위치 1] UTILS/utils.py -> SteamAPI 클래스 -> get_info 함수
@@ -38,7 +40,7 @@
 - <span style="color: yellow">[WARN.K.A-0001] : API key를 저장하고 있는 원본 JSON파일이 경로에 존재하지 않거나, 깨져 백업 파일로 사용.</span>  
     - [로그 위치 1] UTILS/utils.py -> get_key 함수
 
-## 2. 데이터 관련 로그
+## 1-2. 데이터 관련 로그
 ---
 - <span style="color: yellow">[WARN.D-0001] : 중복된 데이터 일 때</span>
     - [로그 위치 1] UTILS.utils.py -> SteamAPI 클래스 -> get_topsellers 함수
@@ -55,7 +57,7 @@
 
 
 
-## 3. DB 관련 로그
+## 1-3. DB 관련 로그
 ---
 - <span style="color: red">[ERR.DB.Q-0001] 쿼리에 이상이 있는 경우</span>
     - [로그 위치 1] UTILS/utils.py -> SalesDB 클래스 -> search_table 함수
@@ -69,7 +71,7 @@
     - [로그 위치 1] UTILS/utils.py -> SalesDB 클래스 -> search_table 함수
 
 
-## 4. HTTP 통신 관련 로그
+## 1-4. HTTP 통신 관련 로그
 ---
 - <span style="color: red">[ERR.R-0001] HTML 통신 반환 내용이 200이 아닌 경우 발생</span>
     - [로그 위치 1] UTILS/utils.py -> return_or_print 함수
