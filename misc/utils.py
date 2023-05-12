@@ -10,13 +10,15 @@ import re
 from bs4 import BeautifulSoup as bs
 from steam import Steam
 import requests as req
+import pymysql as sql
 import numpy as np
-import sqlite3
+# import sqlite3
 
 from misc import configs
 
 LOGGER     = configs.LOGGER
 CONFIG     = configs.CONFIG
+PORTS      = configs.PORTS
 
 ## 모든 경로의 뿌리가 되는 경로
 ROOT_PATH  = configs.ROOT_PATH
@@ -71,27 +73,28 @@ def get_sale_items(n_contents = 10, query = None):
 
     for idx, db_data in enumerate(db_datas):
 
-        _, appid, name, percent, original, discounted, platform, _ = db_data
+        _, appid, name, percent, discounted, original, platform, page, thumbnail, _ = db_data
 
-        json_data = SteamAPI.get_info(appid)
-        genre     = SteamAPI.get_genre(appid, platform)
+        json_data = utils.SteamAPI.get_info(appid)
+        genre = utils.SteamAPI.get_genre(appid, platform)
+
+        discounted = discounted.strip()
+        original   = original.strip()
 
         try:
-
-            data = {
-                        'image'       : json_data['header_image'],
-                        'name'        : json_data['name'],
-                        'genre'       : genre,
-                        'original'    : f'₩ {original:,}',
-                        'percentage'  : f'-{percent}%',
-                        'discounted'  : f'₩ {discounted:,}',
-                        'steam_page'  : f'{SteamAPI.URLS["steam_page"]}/{appid}'
-                    }
-
+            info = {
+                    'image'      : thumbnail,
+                    'name'       : name,
+                    'genre'      : genre,
+                    'original'   : f'{original:}',
+                    'percentage' : f'-{percent}%',
+                    'discounted' : f'{discounted:}', 
+                    'steam_page' : page
+                }
             datas[idx] = data
 
         except Exception as e:
-                LOGGER.warning(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
+                print(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
 
     return {"data" : datas}
 
@@ -356,6 +359,11 @@ class SalesDB:
 
         self.table_name = table_name
         self.db_name    = db_name
+
+        self.passwd     = CONFIG.sql_passwd
+        self.host       = CONFIG.global_host
+        self.user       = CONFIG.sql_user
+        self.port       = PORTS.sql_port
         
         ## DataBase 연결
         self.connect_db()
@@ -364,13 +372,17 @@ class SalesDB:
     ## DB와 연결시켜주는 함수
     def connect_db(self):
 
-        dbpath = f'{DB_PATH}/{self.db_name}.db'
-        self.conn   = sqlite3.connect(dbpath, check_same_thread = False)
+        # dbpath = f'{DB_PATH}/{self.db_name}.db'
+        # self.conn   = sqlite3.connect(dbpath, check_same_thread = False)
+        # self.cursor = self.conn.cursor()
+
+        self.conn = sql.connect(host   = self.host, port = self.port, 
+                                user = self.user, passwd = self.passwd, db = self.db_name)
         self.cursor = self.conn.cursor()
 
 
     ## DB에 있는 데이터를 조회하는 함수 고급 쿼리 부분은 좀 더 구현해야 한다.
-    def search_table(self, columns = '*', **kwargs):
+    def search_table(self, columns = '*', platform = 'steam', **kwargs):
 
         ## keyword argument 값에서 데이터가 없는 경우 기본값 지정
         ## 이부분도 너무 킹받게 짜졌다,, 안되는거 그냥 덕지덕지 수정했더니...
@@ -403,7 +415,7 @@ class SalesDB:
             ## 데이터 조회할 때 그 어떤 조건도 없는 경우 그냥 테이블에서 컬럼만 받아 사용
             if conditions == None:
                 query = f"""
-                            SELECT DISTINCT {columns} FROM {self.table_name}
+                            SELECT DISTINCT {columns} FROM {self.table_name} WHERE platform='{platform}'
                         """
             
             else:
@@ -414,13 +426,14 @@ class SalesDB:
                 if len(conditions) == 3:
                     col, cond, data = conditions
 
+                    print('\n\n', col, cond, data, '\n\n')
                     symbols = ['>', '<', '!=', '=', '>=', '<=', 'IN']
                     assert cond in symbols, f'\n[ERR.DB.Co-0002] 조건이 올바르지 않습니다. {symbols}에서 선택해 넣어주십시오.'
             
                     
                     query = f"""
                                 SELECT DISTINCT {columns} FROM {self.table_name}
-                                WHERE {col} {cond} {data};
+                                WHERE {col} {cond} {data} AND platform='{platform}';
                             """
                 
                 ## 데이터를 찾을 column과 찾을 data만 있는 경우
@@ -429,7 +442,7 @@ class SalesDB:
                     col, data = conditions
                     query = f"""
                                 SELECT DISTINCT {columns} FROM {self.table_name}
-                                WHERE {col}={data};
+                                WHERE {col}={data} AND platform='{platform}';
                             """
 
             self.cursor.execute(query)
@@ -447,4 +460,4 @@ class SalesDB:
                       key = lambda x: x[col_index], reverse = reverse)
 
 
-DB = SalesDB(table_name = 'discounts', db_name = 'sale_informations')
+DB = SalesDB(table_name = 'discount_info', db_name = 'DoveNest')

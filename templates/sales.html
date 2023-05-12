@@ -121,8 +121,40 @@
                                     {% endif %}
                                 </ul>
                             </div>
+
                             <div id="tab-2" class = "gaming-library profile-library tab-content">
-                                <h1>아직 준비중입니다.</h1>
+                                <table class="sale-info-table">
+                                    <thead>
+                                        <tr class="sale-table-head">
+                                            <th>제목</th>
+                                            <th>썸네일</th>
+                                            <th>이름</th>
+                                            <th>원본 가격</th>
+                                            <th>할인율</th>
+                                            <th>할인 가격</th>
+                                            <th>링크</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% if datas %}
+                                            {% for data in datas %}
+                                                <tr>
+                                                    <td class = 'table-index'>{{ forloop.counter0|add:datas.start_index }}</td>
+                                                    <td class = 'table-thumbnail'><img src={{ data.image }}></td>
+                                                    <td class = 'table-name'>{{ data.name }}</td>
+                                                    <td class = 'table-original'>{{ data.original }}</td>
+                                                    <td class = 'table-percentage'>{{ data.percentage }}</td>
+                                                    <td class = 'table-discounted'>{{ data.discounted }}</td>
+                                                    <td class = 'table-seteam-page'><a href = {{ data.steam_page }}><img src={% static "custom/images/logos/nintendo.png" %}></a></td>                                
+                                                </tr>        
+                                            {% endfor %}
+                                        {% else %}
+                                            오늘의 할인 정보가 없습니다.
+                                        {% endif %}
+                                    </tbody>
+
+                                </table>
                             </div>
                             <div id="tab-3" class = "gaming-library profile-library tab-content">
                                 <h1>아직 준비중입니다.</h1>
@@ -139,7 +171,8 @@
         </div>
     </div>
 
-    <script src={% static "vendor/jquery/jquery.min.js" %}></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <!-- <script src={% static "vendor/jquery/jquery.min.js" %}></script> -->
     <script src={% static "vendor/bootstrap/js/bootstrap.min.js" %}></script>
   
     <script src={% static "assets/js/isotope.min.js" %}></script>
@@ -246,7 +279,18 @@
                 $('#'+tab_id).addClass('current'); 
 
                 console.log(this, '#'+tab_id);
+                
+                $.ajax({
+                    url  : "",
+                    type : "POST", dataType : "json",
+                    headers : {"X-CSRFToken" : "{{ csrf_token }}"},
+                    data    : JSON.stringify({"id" : this.id}),
+                    success : function(data){
+                                console.log("Django 민수야 고맙다");
+                            },
 
+                    error : function(request, error){ alert(request.status); }
+                })
             });
         });
     </script>

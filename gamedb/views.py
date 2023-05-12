@@ -1,3 +1,4 @@
+from traceback import format_exc
 from datetime import datetime
 from time import time
 
@@ -6,7 +7,7 @@ from django.shortcuts import render
 
 from misc import utils
 
-DB         = utils.SalesDB(table_name = 'discounts', db_name = 'sale_informations')
+DB         = utils.SalesDB(table_name = 'discount_info', db_name = 'DoveNest')
 N_CONTENTS = 200
 
 def gamedb(request):
@@ -26,26 +27,30 @@ def gamedb(request):
     db_datas = DB.search_table(how_many = N_CONTENTS, conditions = ['date', today], 
                                desc = desc, sorting_col = sorting_)
     for db_data in db_datas:
-        _, appid, name, percent, original, discounted, platform, _ = db_data
+
+        _, appid, name, percent, discounted, original, platform, page, thumbnail, _ = db_data
         
         json_data = utils.SteamAPI.get_info(appid)
         genre = utils.SteamAPI.get_genre(appid, platform)
 
+        discounted = discounted.strip()
+        original   = original.strip()
 
         try:
             info = {
-                    'image'      : json_data['header_image'],
-                    'name'       : json_data['name'],
+                    'image'      : thumbnail,
+                    'name'       : name,
                     'genre'      : genre,
-                    'original'   : f'₩ {original:,}',
+                    'original'   : original,
                     'percentage' : f'-{percent}%',
-                    'discounted' : f'₩ {discounted:,}', 
-                    'steam_page' : f'{utils.SteamAPI.URLS["steam_page"]}/{appid}'
+                    'discounted' : discounted, 
+                    'steam_page' : page
                 }
             datas.append(info)
         
         except Exception as e:
                 print(f'[WARN.D.A-0001] <{appid}> 현재 그 컨텐츠는 {platform}에서 제공 되지 않습니다. {e}')
+                print(format_exc())
 
     ## 페이지 네이션 해주는 부분
     page = request.GET.get('page', '1')
