@@ -7,12 +7,13 @@ import os
 from easydict import EasyDict as edict
 import requests as req
 from tqdm import tqdm
+import schedule
 import redis
 
 def get_logger():
 
     logger = logging.getLogger('DoveNest')
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('\n[%(asctime)s][%(levelname)s] %(name)s : %(message)s')
     stream_handler = logging.StreamHandler()
@@ -33,7 +34,7 @@ URLS        = {'appdetail' : 'https://store.steampowered.com/api/appdetails?appi
 
 HOST        = CONFIG.global_host
 PORT        = PORTS.redis_port
-conn        = redis.Redis(host = HOST, port = PORT, db = 1)
+conn        = redis.Redis(host = HOST, port = PORT, db = 1, decode_responses = True)
 
 def return_or_print(url):
     
@@ -52,18 +53,26 @@ def save_redis(idx, apps):
  
     for app in tqdm(apps):
         
+        appid  = app['appid']
         try:
-            info = get_info(app)[str(app)]['data']
+            info = get_info(appid)[str(appid)]['data']
             data = {
                         'name' : info['name'],
                         'data' : info 
                     }
             
-            conn.set(f'id:{app}', json.dumps(data))
+            LOGGER.info('저장중...')
+            conn.set(f'id:{appid}', json.dumps(data))
             
         except Exception as e: 
-            if type(e) == KeyError: continue
-            LOGGER.error(e)
+            LOGGER.error(f'[K.1] {e}')
+
+            try:
+                data = {'name' : app['name']}
+                conn.set(f'id:{appid}', json.dumps(data))
+
+            
+            except: LOGGER.error(f'[K.2] {e}')
         
         finally: 
             time.sleep(7)
@@ -91,16 +100,17 @@ def begin_jobs(apps):
     time.time() - stime
 
 
-apps = return_or_print('https://api.steampowered.com/ISteamApps/GetAppList/v2')['applist']['apps']
-
+apps      = return_or_print('https://api.steampowered.com/ISteamApps/GetAppList/v2')['applist']['apps']
 print(f'original length : {len(apps)}')
-keys = set([key.decode().split(':')[1] for key in conn.keys()])
-apps = [app['appid'] for app in apps if str(app['appid']) not in keys]
+
+keys      = set(conn.keys())
+condition = lambda x: (f'id:{x["appid"]}' not in keys, x['name'] != '', x['name'].lower() not in 'demo')
+apps      = [app for app in apps if all(condition(app))]
+
 print(f'작업해야하는 length : {len(apps)}')
+begin_jobs(apps)
 
-# begin_jobs(apps)
-
-schedule.every().day.at("01:00").do(begin_jobs, apps)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# schedule.every().day.at("01:00").do(begin_jobs, apps)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
