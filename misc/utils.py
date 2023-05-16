@@ -67,8 +67,9 @@ def get_sale_items(n_contents = 10, query = None):
     sorting_ = query if query != None else 'idx'
     desc     = True  if sorting_ in ['percent', 'name'] else False
     db_datas = DB.search_table(
-                                how_many = n_contents, conditions  = ['date', today],
-                                desc     =       desc, sorting_col = sorting_
+                                table_name = 'discount_info', how_many = n_contents, 
+                                conditions  = ['date', today], desc     =       desc, 
+                                sorting_col = sorting_
                             )
 
     for idx, db_data in enumerate(db_datas):
@@ -355,9 +356,8 @@ class SteamAPI:
 ## 할인 DB 관련 클래스 생성
 class SalesDB:
 
-    def __init__(self, table_name, db_name):
+    def __init__(self, db_name):
 
-        self.table_name = table_name
         self.db_name    = db_name
 
         self.passwd     = CONFIG.sql_passwd
@@ -382,7 +382,7 @@ class SalesDB:
 
 
     ## DB에 있는 데이터를 조회하는 함수 고급 쿼리 부분은 좀 더 구현해야 한다.
-    def search_table(self, columns = '*', platform = 'steam', **kwargs):
+    def search_table(self, table_name, columns = '*', platform = 'steam', **kwargs):
 
         ## keyword argument 값에서 데이터가 없는 경우 기본값 지정
         ## 이부분도 너무 킹받게 짜졌다,, 안되는거 그냥 덕지덕지 수정했더니...
@@ -415,7 +415,7 @@ class SalesDB:
             ## 데이터 조회할 때 그 어떤 조건도 없는 경우 그냥 테이블에서 컬럼만 받아 사용
             if conditions == None:
                 query = f"""
-                            SELECT DISTINCT {columns} FROM {self.table_name} WHERE platform='{platform}'
+                            SELECT DISTINCT {columns} FROM {table_name} WHERE platform='{platform}'
                         """
             
             else:
@@ -432,7 +432,7 @@ class SalesDB:
             
                     
                     query = f"""
-                                SELECT DISTINCT {columns} FROM {self.table_name}
+                                SELECT DISTINCT {columns} FROM {table_name}
                                 WHERE {col} {cond} {data} AND platform='{platform}';
                             """
                 
@@ -441,7 +441,7 @@ class SalesDB:
                 elif len(conditions) == 2:
                     col, data = conditions
                     query = f"""
-                                SELECT DISTINCT {columns} FROM {self.table_name}
+                                SELECT DISTINCT {columns} FROM {table_name}
                                 WHERE {col}={data} AND platform='{platform}';
                             """
 
@@ -452,7 +452,7 @@ class SalesDB:
 
         except Exception as e:
             LOGGER.error(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
-            query     = f'SELECT * FROM {self.table_name}'
+            query     = f'SELECT * FROM {table_name}'
             col_index = 0
 
         ## how_many가 0을 포함한 음의 정수가 된다면 모든 데이터를 조회해준다.
@@ -460,4 +460,4 @@ class SalesDB:
                       key = lambda x: x[col_index], reverse = reverse)
 
 
-DB = SalesDB(table_name = 'discount_info', db_name = 'DoveNest')
+DB = SalesDB(db_name = 'DoveNest')
