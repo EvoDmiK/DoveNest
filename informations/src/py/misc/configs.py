@@ -48,13 +48,19 @@ def get_json(ftype = 'config'):
 
 
 URLS      = {
-                'nintendo' : 'https://store.nintendo.co.kr/games/sale',
-                'steam'    : 'https://store.steampowered.com/search/?specials=1&filter=topsellers&page='
+                'nintendo'     : 'https://store.nintendo.co.kr/games/sale',
+                'steam'        : 'https://store.steampowered.com/search/?specials=1&filter=topsellers&page=',
+                
+                'nintendo_rel' : 'https://www.nintendo.co.kr/software/release/'
+                # 'steam_rel'    :  
             }
 
 ITEMS_TAG = {
-                'nintendo' : 'div.category-product-item',
-                'steam'    : 'div#search_resultsRows > a',
+                'nintendo'     : 'div.category-product-item',
+                'steam'        : 'div#search_resultsRows > a',
+
+                'nintendo_rel' : '.release-soft',
+                # 'steam_rel'    :  
             }
 
 CONFIGS = get_json()
