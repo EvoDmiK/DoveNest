@@ -16,7 +16,8 @@ TOKEN      = CONFIG.bot_token
 NOW        = datetime.now()
 Y, M, D    = NOW.year, NOW.month, NOW.day
 
-DB         = utils.SalesDB(table_name = 'discount_info', db_name = 'DoveNest')
+DB     = utils.SalesDB(db_name = 'DoveNest')
+
 
 today      = f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
 
@@ -60,7 +61,7 @@ async def discount(ctx, platform = 'steam', page = 1, n_contents = 5, query = No
 
     ## MySQL 서버에서 쿼리에 맞게 데이터를 불러오는 부분
     ## 자세한 코드는 misc/utils.py 코드에 있음.
-    db_datas = DB.search_table(how_many = n_contents * page, platform = platform, 
+    db_datas = DB.search_table(table_name  = 'discount_info', how_many = n_contents * page, platform = platform, 
                                conditions  = ['date', today], desc = desc, sorting_col = sorting_)
 
     ## page 인자값의 클 수록 조회해야하는 데이터 수가 많아서 시간이 오래걸림,, -> 개선 필요함.
