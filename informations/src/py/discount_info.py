@@ -152,8 +152,8 @@ def mining(platform = 'steam'):
 
 
 ## 매일 오전 10시 반에 데이터 가져오는 함수 실행
-schedule.every().day.at("10:30").do(mining, 'steam')
-schedule.every().day.at("10:30").do(mining, 'nintendo')
+schedule.every().day.at("10:05").do(mining, 'steam')
+schedule.every().day.at("10:05").do(mining, 'nintendo')
 
 
 while True:

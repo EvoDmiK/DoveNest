@@ -96,7 +96,11 @@ def mining(platform = 'steam'):
     DB.commit()
 
 
-mining('steam')
-mining('nintendo')
-        
+schedule.every().day.at("10:00").do(mining, 'steam')
+schedule.every().day.at("10:00").do(mining, 'nintendo')
+
+while True:
+
+    schedule.run_pending()
+    time.sleep(1)
 
