@@ -51,8 +51,8 @@ URLS      = {
                 'nintendo'     : 'https://store.nintendo.co.kr/games/sale',
                 'steam'        : 'https://store.steampowered.com/search/?specials=1&filter=topsellers&page=',
                 
-                'nintendo_rel' : 'https://www.nintendo.co.kr/software/release/'
-                # 'steam_rel'    :  
+                'nintendo_rel' : 'https://www.nintendo.co.kr/software/release/',
+                'steam_rel'    : 'https://store.steampowered.com/explore/upcoming/?l=koreana'
             }
 
 ITEMS_TAG = {
@@ -60,7 +60,7 @@ ITEMS_TAG = {
                 'steam'        : 'div#search_resultsRows > a',
 
                 'nintendo_rel' : '.release-soft',
-                # 'steam_rel'    :  
+                'steam_rel'    : 'div.home_tabs_content > div.tab_content'
             }
 
 CONFIGS = get_json()

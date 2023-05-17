@@ -85,7 +85,31 @@ async def discount(ctx, platform = 'steam', page = 1, n_contents = 5, query = No
     except Exception as e:
 
         LOGGER.error(f'[ERR.Dc.001] 메시지를 전송하지 못했습니다. {e}')
-        await ctx.reply('잠시 후 다시 이용바랍니다. ')
+        await ctx.reply('잠시 후 다시 이용바랍니다.')
+
+
+@bot.command(name = '출시 정보', aliases = ['출시', '발매', 'release', 'launch'])
+async def release(ctx, platform = 'steam', page = 1, n_contents = 5):
+
+    db_datas = DB.search_table(table_name = 'release_info', how_many = n_contents * page, 
+                                platform = platform, conditions = ['date', today], sorting_col = 'idx')
+
+    db_datas = db_datas[n_contents * (page - 1) : n_contents * page]
+
+    try:
+        header = ['#', 'title', 'rel_date', 'developer', 'platform']
+        body   = [data[:5] for data in db_datas]
+
+        output = table2ascii(header            = header,
+                             body              = body,    
+                             alignmnets        = Alignment.LEFT,
+                             first_col_heading = True)
+
+        await ctx.reply(output)
+
+    except Exception as e:
+        LOGGER.error(f'[ERR.Dc.001] 메시지를 전송하지 못했습니다. {e}')
+        await ctx.reply('잠시 후 다시 이용바랍니다.')
 
 
 ## 프로그램 재시작 함수

@@ -30,29 +30,24 @@ def scrapping(platform = 'steam'):
     LOGGER.info(f'[INFO] 현재 {platform} 출시 정보 페이지를 스크래핑 중입니다. 잠시만 기다려주세요.')
     url = URLS[f'{platform}_rel']
 
-    if platform == 'steam': pass
-
-    elif platform == 'nintendo':
-        res = req.get(url).text
-
-
+    res = req.get(url).text
     soup = bs(res, 'html.parser')
-    LOGGER.info(f'[INFO] {platform} 출시 정보 페이지 스크래핑을 완료했습니다.\n')
 
+    LOGGER.info(f'[INFO] {platform} 출시 정보 페이지 스크래핑을 완료했습니다.\n')
     return soup.select(ITEMS_TAG[f'{platform}_rel'])
 
 
 def mining(platform = 'steam'):
 
     DB.connect_db()
-    DB.create_table([
-                    ['title',     'TEXT', True],
-                    ['rel_date',  'TEXT', True],
-                    ['developer', 'TEXT', False],
-                    ['platform',  'TEXT', True],
-                    ['thumbnail', 'TEXT', False],
-                    ['date',      'TEXT', True]
-                ])
+    if platform == 'steam':
+        DB.create_table([
+                        ['title',     'TEXT', True],
+                        ['rel_date',  'TEXT', True],
+                        ['platform',  'TEXT', True],
+                        ['thumbnail', 'TEXT', False],
+                        ['date',      'TEXT', True]
+                    ])
 
     items  = scrapping(platform)
 
@@ -63,12 +58,18 @@ def mining(platform = 'steam'):
     LOGGER.info(f'[INFO] 현재 테이블에 저장된 데이터 개수는 {length}개 입니다.\n')
 
     try:
-        if platform == 'steam': pass
+        item_tag    = 'a.tab_item' if platform == 'steam' else 'li'
+        
+        for idx, item in enumerate(items[0].select(item_tag), 1):
 
-        elif platform == 'nintendo':
+            if platform == 'steam':
+                title     = item.select('div.tab_item_name')[0].text
+                thumbnail = item.select('img.tab_item_cap_img')[0]['src']
 
-            for idx, item in enumerate(items[0].select('li'), 1):
+                rel_date  = item.select('div.release_date')[0].text
+                rel_date  = rel_date if rel_date != '' else '미정'
 
+            elif platform == 'nintendo':
                 thumbnail = item.select('img')[0]['src']
                 thumbnail = f'https://www.nintendo.co.kr{thumbnail}'
 
@@ -77,26 +78,25 @@ def mining(platform = 'steam'):
                 rel_date  = clear(item.select('.rel-date')[0].text.strip())
                 rel_date  = rel_date if rel_date != '' else '미정'
 
-                data_tuple = [
-                                ['idx',       idx + length],
-                                ['title',     title],
-                                ['rel_date',  rel_date],
-                                ['developer', developer],
-                                ['platform',  platform],
-                                ['thumbnail', thumbnail],
-                                ['date',      TODAY]
-                            ]
-
-                DB.insert_table(data_tuple)
+            data_tuple = [
+                            ['idx'      , idx + length],
+                            ['title'    , title],
+                            ['rel_date' , rel_date],
+                            ['platform' , platform],
+                            ['thumbnail', thumbnail],
+                            ['date'     , TODAY]
+                        ]
+            DB.insert_table(data_tuple)
 
         LOGGER.info(f'[INFO] DB에 모든 데이터 입력을 완료 했습니다.')
         LOGGER.info(f'[INFO] 현재 테이블에 저장된 데이터 개수는 {len(DB)}개 입니다.\n')
-    except: LOGGER.error(format_exc())
 
+
+    except: LOGGER.error(format_exc())
     DB.commit()
 
 
-
+mining('steam')
 mining('nintendo')
         
 
