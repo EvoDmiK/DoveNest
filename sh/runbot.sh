@@ -2,7 +2,7 @@
 
 ROOT_PATH=/config/workspace/project
 
-check=`ps -ef | grep dove-bot | wc | awk '{print $1}'`
+check=`ps -ef | grep homing | wc | awk '{print $1}'`
 
 if [ $check -gt 1 ]; then
     echo "현재 전서구 봇이 실행 중 입니다."
