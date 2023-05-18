@@ -390,9 +390,9 @@ class SalesDB:
         sorting_col = sorting_col if sorting_col != '*' else  \
                     ('appid' if type(sorting_col) != list else sorting_col[0])
 
-        conditions  = kwargs['conditions']  if 'conditions' in kwargs.keys() else None
-        how_many    = kwargs['how_many']    if 'how_many' in kwargs.keys() else 1
-        reverse     = kwargs['desc']        if 'desc' in kwargs.keys() else False
+        conditions  = kwargs['conditions']  if 'conditions' in kwargs else None
+        how_many    = kwargs['how_many']    if 'how_many' in kwargs else 1
+        reverse     = kwargs['desc']        if 'desc' in kwargs else False
 
         
         col_indexes = {k : v for v, k in enumerate(['idx', 'appid', 'name', 'percent', 
