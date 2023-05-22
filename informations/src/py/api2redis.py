@@ -80,7 +80,18 @@ def save_redis(idx, apps):
         print(f'[Done] process : {idx}th job is finished.\n')
 
 
-def begin_jobs(apps):        
+def begin_jobs():
+
+    apps      = return_or_print('https://api.steampowered.com/ISteamApps/GetAppList/v2')['applist']['apps']
+    print(f'original length : {len(apps)}')
+
+    keys      = set(conn.keys())
+    condition = lambda x: (f'id:{x["appid"]}' not in keys, x['name'] != '', x['name'].lower() not in 'demo')
+    apps      = [app for app in apps if all(condition(app))]
+
+    print(f'작업해야하는 length : {len(apps)}')
+    # begin_jobs(apps)
+    
     job1 = apps[: len(apps) // 4]
     job2 = apps[len(apps) // 4: len(apps) // 2]
     job3 = apps[len(apps) // 2: 3 * len(apps) // 4]
@@ -100,17 +111,7 @@ def begin_jobs(apps):
     time.time() - stime
 
 
-apps      = return_or_print('https://api.steampowered.com/ISteamApps/GetAppList/v2')['applist']['apps']
-print(f'original length : {len(apps)}')
-
-keys      = set(conn.keys())
-condition = lambda x: (f'id:{x["appid"]}' not in keys, x['name'] != '', x['name'].lower() not in 'demo')
-apps      = [app for app in apps if all(condition(app))]
-
-print(f'작업해야하는 length : {len(apps)}')
-begin_jobs(apps)
-
-# schedule.every().day.at("01:00").do(begin_jobs, apps)
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+schedule.every().day.at("09:30").do(begin_jobs)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
