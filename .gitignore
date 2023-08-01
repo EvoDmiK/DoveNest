@@ -4,6 +4,7 @@ informations/**/*.json
 informations/**/*.sql
 informations/**/*.db
 informations/logs/*
+templates/**/*.txt
 informations/db/*
 **/*.sqlite3
 **/**/*.jpg
@@ -18,7 +19,6 @@ informations/**/*.sh
 
 ## 로그파일 보호
 **/*.out
-**/*.txt
 **/*.log
 
 ## 그냥 내가 보기 싫어서 없애둔 것들
