@@ -460,4 +460,41 @@ class SalesDB:
                       key = lambda x: x[col_index], reverse = reverse)
 
 
+class DiscountDB:
+
+    def __init__(self, db_name):
+
+        self.db_name   = db_name
+        self.passwd    = CONFIG.sql_passwd
+        self.host      = CONFIG.global_host
+        self.user      = CONFIG.sql_user
+        self.port      = PORTS.sql_port
+
+        self.connect_db()
+
+
+    def connect_db(self):
+
+        self.conn = sql.connect(host   = self.host, port =    self.port, user = self.user,
+                                passwd = self.passwd, db = self.db_name)
+
+        self.cursor = self.conn.cursor()
+
+
+    def select_db(self, table_name: str, column: str = '*',
+                    order: str    = None, cond: str     = None, 
+                    limit_k: str  = None, group: str  = None, 
+                    how_many: int = 1):
+
+        query = f'select {column} from {table_name}'
+        if    cond: query += f' where {cond}'
+        if   group: query += f' group by {group}'
+        if   order: query += f' order by {order}'
+        if limit_k: query += f' limit {limit_k}'
+
+        LOGGER.info(f'[INFO.Q.001] QUERY : {query}')
+
+
+
+
 DB = SalesDB(db_name = 'DoveNest')
