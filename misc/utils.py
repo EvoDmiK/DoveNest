@@ -12,7 +12,7 @@ from steam import Steam
 import requests as req
 import pymysql as sql
 import numpy as np
-# import sqlite3
+import redis
 
 from misc import configs
 
@@ -130,8 +130,7 @@ class SteamAPI:
         ## appid : 게임의 고유 id
 
         ## == 출력 값 ==
-        ## json 파일이 있을 경우에는 저장되어 있는 json 파일을 불러와 반환
-        ## json 파일이 없는 경우에는 어쩔 수 없이 API로 받아와서 반환 
+        ## redis에 정보가 저장되어 있는 경우 데이터를 불러와 반환
         json_path = f'{DATA_PATH}/{appid}/{appid}.json'
 
         if os.path.isfile(json_path): 
@@ -141,6 +140,7 @@ class SteamAPI:
             print(f'[ERR.J-0001] <{appid}> json 파일이 존재하지 않습니다.')
             
             return {}
+
 
 
     ## api key와 steam user_id64를 입력받아서 해당 유저의 라이브러리 정보를 불러오는 함수
@@ -191,6 +191,7 @@ class SteamAPI:
                 datas       = load_json(f'{DATA_PATH}/{appid}/{appid}.json')
                 played_time = f'{mt.ceil(played_time / 60)} 시간' if played_time / 60 > 1 else f'{int(played_time)} 분'
 
+                LOGGER.info(datas)
                 info  = {   
                             'image' : datas['header_image'],
                             'name'  : datas['name'],
@@ -225,7 +226,8 @@ class SteamAPI:
             appid, _, _ = lib
             
             try:
-                datas = load_json(f'{DATA_PATH}/{appid}/{appid}.json')
+                datas       = load_json(f'{DATA_PATH}/{appid}/{appid}.json')
+                datas       = json.loads(REDIS.get(f'id:{appid}'.encode('ascii')))
                 genres     += [data['description'] for data in datas['genres']]
                 developers += [data  for  data  in datas['developers']]
 
@@ -265,8 +267,7 @@ class SteamAPI:
         num1, num2 = nums
         for game in sales['top_sellers']['items'][num1 : num2]:
 
-            appid = game['id']
-            name  = game['name']
+            appid, name = game['id'], game['name']
 
             genre = SteamAPI.get_genre(appid, platform)
 
@@ -353,113 +354,7 @@ class SteamAPI:
         return infos
 
 
-## 할인 DB 관련 클래스 생성
-class SalesDB:
-
-    def __init__(self, db_name):
-
-        self.db_name    = db_name
-
-        self.passwd     = CONFIG.sql_passwd
-        self.host       = CONFIG.global_host
-        self.user       = CONFIG.sql_user
-        self.port       = PORTS.sql_port
-        
-        ## DataBase 연결
-        self.connect_db()
-
-
-    ## DB와 연결시켜주는 함수
-    def connect_db(self):
-
-        # dbpath = f'{DB_PATH}/{self.db_name}.db'
-        # self.conn   = sqlite3.connect(dbpath, check_same_thread = False)
-        # self.cursor = self.conn.cursor()
-
-        self.conn = sql.connect(host   = self.host, port = self.port, 
-                                user = self.user, passwd = self.passwd, db = self.db_name)
-        self.cursor = self.conn.cursor()
-
-
-    ## DB에 있는 데이터를 조회하는 함수 고급 쿼리 부분은 좀 더 구현해야 한다.
-    def search_table(self, table_name, columns = '*', platform = 'steam', **kwargs):
-
-        ## keyword argument 값에서 데이터가 없는 경우 기본값 지정
-        ## 이부분도 너무 킹받게 짜졌다,, 안되는거 그냥 덕지덕지 수정했더니...
-        sorting_col = kwargs['sorting_col'] if 'sorting_col' in kwargs.keys() else columns
-        sorting_col = sorting_col if sorting_col != '*' else  \
-                    ('appid' if type(sorting_col) != list else sorting_col[0])
-
-        conditions  = kwargs['conditions']  if 'conditions' in kwargs else None
-        how_many    = kwargs['how_many']    if 'how_many' in kwargs else 1
-        reverse     = kwargs['desc']        if 'desc' in kwargs else False
-
-        
-        col_indexes = {k : v for v, k in enumerate(['idx', 'appid', 'name', 'percent', 
-                                                    'original', 'discounted', 'date'])}
-
-        ## 코드가 너무 킹받게 짜졌다..
-        col_indexes = col_indexes if columns == '*' else \
-                    ({k : v for v, k in enumerate(columns)} \
-                    if type(columns) == list else {columns : 0})
-
-        col_keys = [col for col in col_indexes.keys()]
-
-        try:
-            assert sorting_col in col_keys, f'''\n[ERR.DB.Co-0001] 선택하신 조건에 맞는 컬럼이 존재하지 않아 선택 하신 옵션으로 정렬 할 수 없었습니다. \
-                                                {col_keys}에서 골라 주십시오.'''
-
-            columns = ', '.join(columns) if type(columns) == list else columns
-
-
-            ## 데이터 조회할 때 그 어떤 조건도 없는 경우 그냥 테이블에서 컬럼만 받아 사용
-            if conditions == None:
-                query = f"""
-                            SELECT DISTINCT {columns} FROM {table_name} WHERE platform='{platform}'
-                        """
-            
-            else:
-                ## 고급 쿼리에 사용할 거
-                conditions = np.array(conditions)
-
-                ## WHERE 문으로 찾을 column, 조건, 데이터를 받아 조회해준다.
-                if len(conditions) == 3:
-                    col, cond, data = conditions
-
-                    print('\n\n', col, cond, data, '\n\n')
-                    symbols = ['>', '<', '!=', '=', '>=', '<=', 'IN']
-                    assert cond in symbols, f'\n[ERR.DB.Co-0002] 조건이 올바르지 않습니다. {symbols}에서 선택해 넣어주십시오.'
-            
-                    
-                    query = f"""
-                                SELECT DISTINCT {columns} FROM {table_name}
-                                WHERE {col} {cond} {data} AND platform='{platform}';
-                            """
-                
-                ## 데이터를 찾을 column과 찾을 data만 있는 경우
-                ## 기본값으로 동일한 데이터만 찾도록 지정해주었다.
-                elif len(conditions) == 2:
-                    col, data = conditions
-                    query = f"""
-                                SELECT DISTINCT {columns} FROM {table_name}
-                                WHERE {col}={data} AND platform='{platform}';
-                            """
-
-            self.cursor.execute(query)
-            
-            ## 데이터 정렬에 사용할 인덱스 값들.
-            col_index = col_indexes[sorting_col]
-
-        except Exception as e:
-            LOGGER.error(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
-            query     = f'SELECT * FROM {table_name}'
-            col_index = 0
-
-        ## how_many가 0을 포함한 음의 정수가 된다면 모든 데이터를 조회해준다.
-        return sorted(self.cursor.fetchmany(how_many), 
-                      key = lambda x: x[col_index], reverse = reverse)
-
-
+## 개선된 DB 관련 클래스 작성
 class DiscountDB:
 
     def __init__(self, db_name):
@@ -473,8 +368,9 @@ class DiscountDB:
         self.connect_db()
 
 
+    ## maria db에 연결해주는 함수
     def connect_db(self):
-
+        
         self.conn = sql.connect(host   = self.host, port =    self.port, user = self.user,
                                 passwd = self.passwd, db = self.db_name)
 
@@ -482,19 +378,22 @@ class DiscountDB:
 
 
     def select_db(self, table_name: str, column: str = '*',
-                    order: str    = None, cond: str     = None, 
-                    limit_k: str  = None, group: str  = None, 
-                    how_many: int = 1):
+                    order: str    = None, cond: str  = None, 
+                    limit_k: str  = None, group: str = None) -> tuple:
 
-        query = f'select {column} from {table_name}'
-        if    cond: query += f' where {cond}'
-        if   group: query += f' group by {group}'
-        if   order: query += f' order by {order}'
-        if limit_k: query += f' limit {limit_k}'
+        try:
+            query = f'select distinct {column} from {table_name}'
+            if    cond: query += f' where {cond}'
+            if   group: query += f' group by {group}'
+            if   order: query += f' order by {order}'
+            if limit_k: query += f' limit {limit_k}'
 
-        LOGGER.info(f'[INFO.Q.001] QUERY : {query}')
+        except: 
+            LOGGER.error(f'[ERR.DB.Q-0001] 쿼리에 문제가 발생하였습니다. 확인 후 수정 바랍니다. \n{format_exc()}')
+            query = f'select distinct * from {table_name}'
 
+        LOGGER.info(f'[INFO.DB.Q-001] QUERY : {query}')
+        self.cursor.execute(query)
+        results = self.cursor.fetchall()
 
-
-
-DB = SalesDB(db_name = 'DoveNest')
+        return results

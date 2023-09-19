@@ -7,9 +7,13 @@ from django.shortcuts import render
 
 from misc import utils
 
-DB         = utils.SalesDB(table_name = 'discount_info', db_name = 'DoveNest')
+## mariaDB 연결
+DB         = utils.DiscountDB(db_name = 'DoveNest')
+
+## 조회할 CONTENTS 개수
 N_CONTENTS = 200
 
+## 게임 할인 정보 페이지에 표시되는 데이터 로딩하는 함수.
 def gamedb(request):
     NOW  = datetime.now()
     Y,M,D = NOW.year, NOW.month, NOW.day
@@ -17,21 +21,32 @@ def gamedb(request):
     datas = []
     today =  f'{Y}{str(M).zfill(2)}{str(D).zfill(2)}'
 
+    ## html에서 GET으로 데이터를 받았을 때 정렬 기준 설정
     if request.method == 'GET': 
         sorting_ = showing = request.GET.get('sorting_')
         sorting_ = sorting_ if sorting_ != None else 'idx'
         showing  = showing  if sorting_ != None else '인기순'
 
+    else:
+        sorting_, showing = 'idx', '정렬 기준'
 
-    desc     = True if sorting_ in ['percent', 'name'] else False
-    db_datas = DB.search_table(how_many = N_CONTENTS, conditions = ['date', today], 
-                               desc = desc, sorting_col = sorting_)
+    ## percent, name의 경우 내림차순으로 정렬, 그 외의 경우에는 오름차순으로 정렬.
+    if sorting_ == 'percent': desc = 'percent desc'
+    else: desc = f'{sorting_} asc'
+
+    ## DB에서 데이터 가져오는 부분
+    db_datas   = DB.select_db('discount_info', order = desc, limit_k = N_CONTENTS,
+                               cond = f'(date = {today}) and (platform = "steam")')
+    
+    ## 조회한 쿼리셋에서 데이터 처리 해주는 부분.
     for db_data in db_datas:
 
-        _, appid, name, percent, discounted, original, platform, page, thumbnail, _ = db_data
+        ## 고유 번호, 게임 이름, 할인율, 할인가, 원본가, 게임 플랫폼, 게임 페이지, 썸네일, 날짜, 리뷰
+        _, appid, name, percent, discounted, original, platform, page, thumbnail, _, review = db_data
         
-        json_data = utils.SteamAPI.get_info(appid)
-        genre = utils.SteamAPI.get_genre(appid, platform)
+
+        ## db에서 가져온 데이터의 게임 장르 중 3개 가져오기
+        genre     = utils.SteamAPI.get_genre(appid, platform)
 
         discounted = discounted.strip()
         original   = original.strip()
