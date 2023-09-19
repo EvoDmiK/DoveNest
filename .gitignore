@@ -24,7 +24,7 @@ informations/**/*.sh
 ## 그냥 내가 보기 싫어서 없애둔 것들
 **/.ipynb_checkpoints
 **/**/*-checkpoint*
-**/Untitled.ipynb
+**/Untitled*.ipynb
 **/**/*.pyc
 
 templates/static/dataset/group1-shard1of4.bin
