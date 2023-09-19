@@ -72,7 +72,8 @@ def mining(platform = 'steam'):
                     ['platform'  ,    'TEXT', True],
                     ['storepage' ,    'TEXT', False],
                     ['thumbnail' ,    'TEXT', False],
-                    ['date'      ,    'TEXT', True]
+                    ['date'      ,    'TEXT', True],
+                    ['review'    ,    'TEXT', False]
             ])
 
     items      = scrapping(platform)
@@ -107,13 +108,20 @@ def mining(platform = 'steam'):
                 json_      = json.loads(RCONN.get(f'id:{appid}'))
                 thumbnail  = json_['data']['header_image']
 
-                percent     = item.select('.search_discount > span')[0].text
+                block       = item.select('.discount_block')[0]
+                percent     = block.select('.discount_pct')[0].text
                 percent     = clear(percent)
 
-                original    = item.select('strike')[0].text.strip()
-                discount    = item.select('.discounted')[0].text.split('₩')[-1]
+                original    = block.select('.discount_original_price')[0].text.strip()
+                discount    = block.select('.discount_final_price')[0].text.split('₩')[-1]
                 discount    = f'₩{discount}'
 
+                try: 
+                    review = item.select('.search_review_summary')[0]
+                    review = review['data-tooltip-html'].replace('<br>', ' ')
+
+                except: review = None
+            
             elif platform == 'nintendo':
                 
                 title_link = item.select('a.category-product-item-title-link')
@@ -125,21 +133,23 @@ def mining(platform = 'steam'):
                 ## nintendo 할인 페이지에는 할인율을 제공하지 않아 직접 계산 
                 percent    = 100 - round(clear(discount) * 100 / clear(original))
                 title      = title_link[0].text.strip()
+                review     = None
 
                 # LOGGER.info(store_page)
                 appid      = store_page.split('.kr/')[1]
 
             data_tuple = [
-                            ['idx',        idx + length],
-                            ['appid',      appid],
-                            ['title',      title],
-                            ['percent',    percent],
-                            ['discounted', discount],
-                            ['original',   original],
-                            ['platform',   platform],
-                            ['storepage',  store_page],
-                            ['thumbnail',  thumbnail],
-                            ['date',       TODAY]
+                            ['idx'       , idx + length],
+                            ['appid'     ,        appid],
+                            ['title'     ,        title],
+                            ['percent'   ,      percent],
+                            ['discounted',     discount],
+                            ['original'  ,     original],
+                            ['platform'  ,     platform],
+                            ['storepage' ,   store_page],
+                            ['thumbnail' ,    thumbnail],
+                            ['date'      ,        TODAY],
+                            ['review'    ,       review]
                         ]
             DB.insert_table(data_tuple)
 
@@ -151,7 +161,7 @@ def mining(platform = 'steam'):
     DB.commit()
 
 
-## 매일 오전 10시 반에 데이터 가져오는 함수 실행
+## 매일 오전 10시 반에 데이터 가져오는 함수 
 schedule.every().day.at("10:05").do(mining, 'steam')
 schedule.every().day.at("10:05").do(mining, 'nintendo')
 
