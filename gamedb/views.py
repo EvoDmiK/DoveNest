@@ -13,6 +13,18 @@ DB         = utils.DiscountDB(db_name = 'DoveNest')
 ## 조회할 CONTENTS 개수
 N_CONTENTS = 200
 
+review_dict = { 
+                'Overwhelmingly Positive' : '압도적으로 긍정적',
+                'Very Positive'           : '매우 긍정적',
+                'Positive'                : '긍정적',
+                'Mostly Positive'         : '대체로 긍정적',
+                'Mixed'                   : '복합적',
+                'Mostly Negative'         : '대체로 부정적',
+                'Negative'                : '부정적',
+                'Very Negative'           : '매우 부정적',
+                'Overwhelmingly Negative' : '압도적으로 부정적'
+            }
+
 ## 게임 할인 정보 페이지에 표시되는 데이터 로딩하는 함수.
 def gamedb(request):
     NOW  = datetime.now()
@@ -35,8 +47,9 @@ def gamedb(request):
     else: desc = f'{sorting_} asc'
 
     ## DB에서 데이터 가져오는 부분
+    print(today)
     db_datas   = DB.select_db('discount_info', order = desc, limit_k = N_CONTENTS,
-                               cond = f'(date = {today}) and (platform = "steam")')
+                               cond = f'(date = {today}) and (platform = "steam") and (not review is null)')
     
     ## 조회한 쿼리셋에서 데이터 처리 해주는 부분.
     for db_data in db_datas:
@@ -51,6 +64,8 @@ def gamedb(request):
         discounted = discounted.strip()
         original   = original.strip()
 
+        review = ' '.join(review.split()[:1 if 'mixed' in review.lower() else 2])
+
         try:
             info = {
                     'image'      : thumbnail,
@@ -59,7 +74,8 @@ def gamedb(request):
                     'original'   : original,
                     'percentage' : f'-{percent}%',
                     'discounted' : discounted, 
-                    'steam_page' : page
+                    'steam_page' : page,
+                    'review'     : review_dict[review]
                 }
             datas.append(info)
         

@@ -54,6 +54,7 @@
                                             <th>원본 가격</th>
                                             <th>할인율</th>
                                             <th>할인 가격</th>
+                                            <th>평가</th>
                                             <th>링크</th>
                                         </tr>
                                     </thead>
@@ -69,6 +70,7 @@
                                                     <td class = 'table-original'>{{ data.original }}</td>
                                                     <td class = 'table-percentage'>{{ data.percentage }}</td>
                                                     <td class = 'table-discounted'>{{ data.discounted }}</td>
+                                                    <td class = 'table-review'>{{ data.review }}</td>
                                                     <td class = 'table-seteam-page'><a href = {{ data.steam_page }}><img src={% static "custom/images/logos/steam.png" %}></a></td>                                
                                                 </tr>
                                             {% endfor%}
@@ -212,13 +214,14 @@
         
         /* 표 column 관련 스타일 */
         .table-name        { width : 25%; }
-        .table-genre       { width : 25%; }
-        .table-index       { width : 4%;  text-align: center;}
-        .table-original    { width : 10%; text-align: right;}
-        .table-thumbnail   { width : 15%; }
-        .table-percentage  { width : 6%;  text-align: right;}
-        .table-discounted  { width : 10%; text-align: right;}
-        .table-seteam-page { width : 5%;  text-align: right;}
+        .table-genre       { width : 15%; }
+        .table-index       { width :  4%;  text-align : center;}
+        .table-review      { width : 15%;  text-align : center;}
+        .table-original    { width :  8%;  text-align :  right;}
+        .table-thumbnail   { width : 12%;}
+        .table-percentage  { width :  6%;  text-align : right;}
+        .table-discounted  { width :  8%;  text-align : right;}
+        .table-seteam-page { width :  5%;  text-align : right;}
         /* ----------------------------------------------------- */
 
         /* 탭 메뉴 관련 스타일 지정 */
