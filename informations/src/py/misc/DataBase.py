@@ -33,6 +33,8 @@ class _DB:
         self.table  = table
         self.db     = db
 
+        self.connect_db()
+
 
     ## DB 서버에 연결해주는 생성자 함수
     def connect_db(self):
@@ -82,6 +84,19 @@ class _DB:
             LOGGER.error(f'[ERROR] 데이터를 입력하지 못했습니다. 쿼리 확인 부탁드립니다. {e}')
 
     
+    def select_table(self, column: str = '*', order: str = None, cond: str = None,
+                    limit_k: str = None, group: str = None):
+
+        query = f'select {column} from {self.table}'
+        if    cond: query +=     f' where {cond}'
+        if   group: query += f' group by {group}'
+        if   order: query += f' order by {order}'
+        if limit_k: query +=  f' limit {limit_k}'
+
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+
     def commit(self):
         self.conn.commit()
         self.conn.close()
