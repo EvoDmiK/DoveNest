@@ -25,7 +25,6 @@ LOGGER    = configs.LOGGER
 URLS      = configs.URLS
 
 RCONN     = _RedisDB(db_idx = 1)
-DB        = _DB('DoveNest', 'discount_info')
 
 NOW       = datetime.now()
 Y, M, D   = NOW.year, NOW.month, NOW.day
@@ -38,11 +37,11 @@ def scrapping(platform = 'steam'):
     LOGGER.info(f'[INFO] 현재 {platform} 할인 정보 페이지를 스크래핑 중입니다. 잠시만 기다려 주세요.')
     url = URLS[platform]
 
-    ## 파라미터 값이 steam인 경우에는 10페이지까지 데이터를 삭 긁어옴.
+    ## 파라미터 값이 steam인 경우에는 30페이지까지 데이터를 삭 긁어옴.
     if platform == 'steam':
 
         res = ''
-        for idx in range(1, 10):
+        for idx in range(1, 30):
 
             url_  = f'{url}{idx}'
             res += req.get(url_).text
@@ -62,7 +61,7 @@ def scrapping(platform = 'steam'):
 ## 파싱된 데이터에서 필요한 데이터만 뽑아서 DB에 입력하는 함수
 def mining(platform = 'steam'):
 
-    DB.connect_db()
+    DB = _DB('DoveNest', 'discount_info')    
     DB.create_table([
                     ['appid'     ,    'TEXT', True],
                     ['title'     ,    'TEXT', True],
@@ -135,7 +134,8 @@ def mining(platform = 'steam'):
                 title      = title_link[0].text.strip()
                 review     = None
 
-                # LOGGER.info(store_page)
+                ## nintendo 스토어 할인 페이지에는 따로 appid가 없어
+                ## 페이지 링크에 존재하는 데이터를 이용해 사용
                 appid      = store_page.split('.kr/')[1]
 
             data_tuple = [

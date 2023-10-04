@@ -18,7 +18,6 @@ CONFIGS   = configs.CONFIGS
 LOGGER    = configs.LOGGER
 PORTS     = configs.PORTS
 URLS      = configs.URLS
-DB        = _DB('DoveNest', 'release_info')
 
 NOW       = datetime.now()
 Y, M, D   = NOW.year, NOW.month, NOW.day
@@ -39,7 +38,7 @@ def scrapping(platform = 'steam'):
 
 def mining(platform = 'steam'):
 
-    DB.connect_db()
+    DB        = _DB('DoveNest', 'discount_info')    
     if platform == 'steam':
         DB.create_table([
                         ['title',     'TEXT', True],
