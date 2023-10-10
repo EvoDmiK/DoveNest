@@ -14,10 +14,11 @@ import schedule
 
 from misc.logger import get_logger
 from misc.DataBase import _DB
+import misc
 
 
 ## api 서버에 요청해 데이터를 가져오거나 로깅해주는 함수
-def return_or_logging(url: string) -> Union[dict, None]:
+def return_or_logging(url: str) -> Union[dict, None]:
     res = req.get(url)
     if res.status_code == 200: return res.json()
     else: LOGGER.warning(f'no response with code {res.status_code}')
@@ -168,6 +169,7 @@ LOGGER     = get_logger()
 URLS       = {'appdetail' : 'https://store.steampowered.com/api/appdetails?appids',
               'applists'  : 'https://api.steampowered.com/ISteamApps/GetAppList/v2'}
 
+## 데이터가 정상적으로 자동저장 안되었을 때 수동으로 저장시키는 부분.
 # begin_jobs()
 
 ## 매일 오전 9시 30분에 실행되도록 설정하는 부분
