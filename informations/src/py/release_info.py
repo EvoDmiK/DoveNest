@@ -38,7 +38,7 @@ def scrapping(platform = 'steam'):
 
 def mining(platform = 'steam'):
 
-    DB        = _DB('DoveNest', 'discount_info')    
+    DB        = _DB('DoveNest', 'release_info')    
     if platform == 'steam':
         DB.create_table([
                         ['title',     'TEXT', True],
